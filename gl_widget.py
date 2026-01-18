@@ -45,8 +45,6 @@ from OpenGL.GLU import gluLookAt, gluProject, gluUnProject
 from element_data import (
     ELEMENTS,
     GROUP_LABELS,
-    METALLOID_LINE,
-    NON_METALS,
     PERIOD_NOBLE_GAS_SHELLS,
     RADIOACTIVE,
     Element,
@@ -71,7 +69,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._y_spacing = 1.55
         self._right_header_offset = 2.5
         self._left_header_offset = 2.0
-        self._split_offset = 0.15
+        self._split_offset = 0.0
         self._font_family = "Noto Sans Mono CJK SC"
         self._margin_cells = 1.5
         self._camera_radius = 38.0
@@ -88,6 +86,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, [1.1, 1.1, 1.1, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
@@ -382,7 +381,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
 
         font_small = QtGui.QFont(self._font_family, 9)
-        font_symbol = QtGui.QFont(self._font_family, 12, QtGui.QFont.Bold)
+        font_symbol = QtGui.QFont(self._font_family, 14, QtGui.QFont.Bold)
         font_name = QtGui.QFont(self._font_family, 10)
 
         padding = 4.0
@@ -393,7 +392,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         painter.setFont(font_small)
         painter.setPen(QtGui.QColor(240, 240, 240))
-        top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), font_small.pointSizeF() + 6)
+        top_line_height = max(font_small.pointSizeF() + 6, font_symbol.pointSizeF() + 6)
+        top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), top_line_height)
         painter.drawText(top_line, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, number)
 
         painter.setFont(font_symbol)
@@ -436,8 +436,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         group = element.group
         period = element.period
         x, y, z = self._grid_to_world(group, period)
-        if element.symbol in METALLOID_LINE or element.symbol in NON_METALS:
-            x += self._split_offset
         return x, y, z
 
     def _project_point(self, x: float, y: float, z: float) -> Optional[Tuple[int, int]]:
