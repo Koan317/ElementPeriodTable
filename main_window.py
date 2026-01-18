@@ -11,10 +11,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         central = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout(central)
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(6)
 
         left_panel = QtWidgets.QFrame()
-        left_panel.setFixedWidth(180)
+        left_panel.setFixedWidth(130)
         left_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
         left_layout = QtWidgets.QVBoxLayout(left_panel)
         left_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -29,7 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
         center_layout.addWidget(gl_widget)
 
         right_panel = QtWidgets.QFrame()
-        right_panel.setFixedWidth(160)
+        right_panel.setFixedWidth(120)
         right_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
         right_layout = QtWidgets.QVBoxLayout(right_panel)
         right_layout.setAlignment(QtCore.Qt.AlignTop)

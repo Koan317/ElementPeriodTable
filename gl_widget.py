@@ -32,6 +32,7 @@ from OpenGL.GL import (
     glLoadIdentity,
     glMaterialfv,
     glMatrixMode,
+    glNormal3f,
     glPopMatrix,
     glPushMatrix,
     glTranslatef,
@@ -64,13 +65,13 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._modelview = None
         self._projection = None
         self._viewport = None
-        self._cube_size = 1.1
-        self._x_spacing = 1.3
-        self._y_spacing = 1.3
+        self._cube_size = 1.35
+        self._x_spacing = 1.55
+        self._y_spacing = 1.55
         self._right_header_offset = 2.5
         self._left_header_offset = 2.0
         self._split_offset = 0.15
-        self._font_family = "Noto Sans CJK SC"
+        self._font_family = "Noto Sans Mono CJK SC"
 
     def set_group_mode(self, mode: str) -> None:
         self.group_mode = mode
@@ -81,7 +82,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
-        glLightfv(GL_LIGHT0, GL_POSITION, [30.0, 40.0, 60.0, 1.0])
+        glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
@@ -94,11 +95,11 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        camera_radius = 45.0
-        angle = math.radians(80)
+        camera_radius = 38.0
+        angle = math.radians(78)
         camera_x = camera_radius * math.cos(angle)
         camera_z = camera_radius * math.sin(angle)
-        gluLookAt(camera_x, 0.0, camera_z, 9.0, -4.0, 0.0, 0.0, 1.0, 0.0)
+        gluLookAt(camera_x, 0.0, camera_z, 9.0, -4.2, 0.0, 0.0, 1.0, 0.0)
 
         self._modelview = glGetDoublev(GL_MODELVIEW_MATRIX)
         self._projection = glGetDoublev(GL_PROJECTION_MATRIX)
@@ -128,31 +129,37 @@ class PeriodicTableGLWidget(QOpenGLWidget):
     def _draw_cube(self, size: float) -> None:
         half = size / 2
         glBegin(GL_QUADS)
+        glNormal3f(0.0, 0.0, 1.0)
         glVertex3f(-half, -half, half)
         glVertex3f(half, -half, half)
         glVertex3f(half, half, half)
         glVertex3f(-half, half, half)
 
+        glNormal3f(0.0, 0.0, -1.0)
         glVertex3f(-half, -half, -half)
         glVertex3f(-half, half, -half)
         glVertex3f(half, half, -half)
         glVertex3f(half, -half, -half)
 
+        glNormal3f(0.0, 1.0, 0.0)
         glVertex3f(-half, half, -half)
         glVertex3f(-half, half, half)
         glVertex3f(half, half, half)
         glVertex3f(half, half, -half)
 
+        glNormal3f(0.0, -1.0, 0.0)
         glVertex3f(-half, -half, -half)
         glVertex3f(half, -half, -half)
         glVertex3f(half, -half, half)
         glVertex3f(-half, -half, half)
 
+        glNormal3f(1.0, 0.0, 0.0)
         glVertex3f(half, -half, -half)
         glVertex3f(half, half, -half)
         glVertex3f(half, half, half)
         glVertex3f(half, -half, half)
 
+        glNormal3f(-1.0, 0.0, 0.0)
         glVertex3f(-half, -half, -half)
         glVertex3f(-half, -half, half)
         glVertex3f(-half, half, half)
