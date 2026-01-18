@@ -11,12 +11,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
         central = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout(central)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(6)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         left_panel = QtWidgets.QFrame()
-        left_panel.setFixedWidth(130)
+        left_panel.setFixedWidth(0)
         left_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
+        left_panel.setVisible(False)
         left_layout = QtWidgets.QVBoxLayout(left_panel)
         left_layout.setAlignment(QtCore.Qt.AlignTop)
         left_label = QtWidgets.QLabel("功能区域")
@@ -30,8 +31,9 @@ class MainWindow(QtWidgets.QMainWindow):
         center_layout.addWidget(gl_widget)
 
         right_panel = QtWidgets.QFrame()
-        right_panel.setFixedWidth(120)
+        right_panel.setFixedWidth(0)
         right_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
+        right_panel.setVisible(False)
         right_layout = QtWidgets.QVBoxLayout(right_panel)
         right_layout.setAlignment(QtCore.Qt.AlignTop)
         right_layout.setSpacing(12)

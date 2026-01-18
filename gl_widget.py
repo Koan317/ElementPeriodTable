@@ -33,13 +33,14 @@ from OpenGL.GL import (
     glMaterialfv,
     glMatrixMode,
     glNormal3f,
+    glOrtho,
     glPopMatrix,
     glPushMatrix,
     glTranslatef,
     glViewport,
     glVertex3f,
 )
-from OpenGL.GLU import gluLookAt, gluPerspective, gluProject, gluUnProject
+from OpenGL.GLU import gluLookAt, gluProject, gluUnProject
 
 from element_data import (
     ELEMENTS,
@@ -72,6 +73,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._left_header_offset = 2.0
         self._split_offset = 0.15
         self._font_family = "Noto Sans Mono CJK SC"
+        self._margin_cells = 1.5
+        self._camera_radius = 38.0
+        self._camera_angle = math.radians(78)
+        self._camera_target = (9.0, -4.2, 0.0)
 
     def set_group_mode(self, mode: str) -> None:
         self.group_mode = mode
@@ -89,17 +94,16 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         aspect = w / h if h else 1.0
-        gluPerspective(35.0, aspect, 0.1, 200.0)
+        left, right, bottom, top = self._projection_bounds(aspect)
+        glOrtho(left, right, bottom, top, -200.0, 200.0)
 
     def paintGL(self) -> None:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        camera_radius = 38.0
-        angle = math.radians(78)
-        camera_x = camera_radius * math.cos(angle)
-        camera_z = camera_radius * math.sin(angle)
-        gluLookAt(camera_x, 0.0, camera_z, 9.0, -4.2, 0.0, 0.0, 1.0, 0.0)
+        camera_x, camera_z = self._camera_position()
+        target_x, target_y, target_z = self._camera_target
+        gluLookAt(camera_x, 0.0, camera_z, target_x, target_y, target_z, 0.0, 1.0, 0.0)
 
         self._modelview = glGetDoublev(GL_MODELVIEW_MATRIX)
         self._projection = glGetDoublev(GL_PROJECTION_MATRIX)
@@ -165,6 +169,142 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glVertex3f(-half, half, half)
         glVertex3f(-half, half, -half)
         glEnd()
+
+    def _camera_position(self) -> Tuple[float, float]:
+        camera_x = self._camera_radius * math.cos(self._camera_angle)
+        camera_z = self._camera_radius * math.sin(self._camera_angle)
+        return camera_x, camera_z
+
+    def _projection_bounds(self, aspect: float) -> Tuple[float, float, float, float]:
+        min_x, max_x, min_y, max_y = self._table_bounds_world()
+        view_min_x, view_max_x, view_min_y, view_max_y = self._table_bounds_view(
+            min_x,
+            max_x,
+            min_y,
+            max_y,
+        )
+        margin_x = self._margin_cells * self._x_spacing
+        margin_y = self._margin_cells * self._y_spacing
+        left = view_min_x - margin_x
+        right = view_max_x + margin_x
+        bottom = view_min_y - margin_y
+        top = view_max_y + margin_y
+        width = right - left
+        height = top - bottom
+        if height <= 0 or width <= 0:
+            return left, right, bottom, top
+        current_aspect = width / height
+        if current_aspect < aspect:
+            right = left + height * aspect
+        elif current_aspect > aspect:
+            bottom = top - width / aspect
+        return left, right, bottom, top
+
+    def _table_bounds_world(self) -> Tuple[float, float, float, float]:
+        min_x = float("inf")
+        max_x = float("-inf")
+        min_y = float("inf")
+        max_y = float("-inf")
+        for group in range(0, 21):
+            for period in range(0, 8):
+                x, y, _ = self._grid_to_world(group, period)
+                min_x = min(min_x, x)
+                max_x = max(max_x, x)
+                min_y = min(min_y, y)
+                max_y = max(max_y, y)
+        half = self._cube_size / 2
+        return min_x - half, max_x + half, min_y - half, max_y + half
+
+    def _table_bounds_view(
+        self,
+        min_x: float,
+        max_x: float,
+        min_y: float,
+        max_y: float,
+    ) -> Tuple[float, float, float, float]:
+        camera_x, camera_z = self._camera_position()
+        target_x, target_y, target_z = self._camera_target
+        view_matrix = self._look_at_matrix(
+            (camera_x, 0.0, camera_z),
+            (target_x, target_y, target_z),
+            (0.0, 1.0, 0.0),
+        )
+        z_half = self._cube_size / 2
+        min_view_x = float("inf")
+        max_view_x = float("-inf")
+        min_view_y = float("inf")
+        max_view_y = float("-inf")
+        for x in (min_x, max_x):
+            for y in (min_y, max_y):
+                for z in (-z_half, z_half):
+                    view_x, view_y, _ = self._transform_point(view_matrix, (x, y, z))
+                    min_view_x = min(min_view_x, view_x)
+                    max_view_x = max(max_view_x, view_x)
+                    min_view_y = min(min_view_y, view_y)
+                    max_view_y = max(max_view_y, view_y)
+        return min_view_x, max_view_x, min_view_y, max_view_y
+
+    def _look_at_matrix(
+        self,
+        eye: Tuple[float, float, float],
+        center: Tuple[float, float, float],
+        up: Tuple[float, float, float],
+    ) -> List[List[float]]:
+        fx, fy, fz = (
+            center[0] - eye[0],
+            center[1] - eye[1],
+            center[2] - eye[2],
+        )
+        f_len = math.sqrt(fx * fx + fy * fy + fz * fz)
+        if f_len == 0:
+            f_len = 1.0
+        fx, fy, fz = fx / f_len, fy / f_len, fz / f_len
+        up_len = math.sqrt(up[0] * up[0] + up[1] * up[1] + up[2] * up[2])
+        if up_len == 0:
+            up_len = 1.0
+        upx, upy, upz = up[0] / up_len, up[1] / up_len, up[2] / up_len
+        sx = fy * upz - fz * upy
+        sy = fz * upx - fx * upz
+        sz = fx * upy - fy * upx
+        s_len = math.sqrt(sx * sx + sy * sy + sz * sz)
+        if s_len == 0:
+            s_len = 1.0
+        sx, sy, sz = sx / s_len, sy / s_len, sz / s_len
+        ux = sy * fz - sz * fy
+        uy = sz * fx - sx * fz
+        uz = sx * fy - sy * fx
+        return [
+            [
+                sx,
+                sy,
+                sz,
+                -(sx * eye[0] + sy * eye[1] + sz * eye[2]),
+            ],
+            [
+                ux,
+                uy,
+                uz,
+                -(ux * eye[0] + uy * eye[1] + uz * eye[2]),
+            ],
+            [
+                -fx,
+                -fy,
+                -fz,
+                fx * eye[0] + fy * eye[1] + fz * eye[2],
+            ],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+
+    def _transform_point(
+        self,
+        matrix: List[List[float]],
+        point: Tuple[float, float, float],
+    ) -> Tuple[float, float, float]:
+        x, y, z = point
+        view_x = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z + matrix[0][3]
+        view_y = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z + matrix[1][3]
+        view_z = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z + matrix[2][3]
+        return view_x, view_y, view_z
 
     def _draw_overlay(self) -> None:
         glDisable(GL_LIGHTING)
