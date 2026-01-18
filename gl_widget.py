@@ -12,8 +12,10 @@ from OpenGL.GL import (
     GL_LIGHT0,
     GL_LIGHTING,
     GL_MODELVIEW,
+    GL_MODELVIEW_MATRIX,
     GL_POSITION,
     GL_PROJECTION,
+    GL_PROJECTION_MATRIX,
     GL_QUADS,
     GL_SHININESS,
     GL_SPECULAR,
@@ -32,6 +34,7 @@ from OpenGL.GL import (
     glPopMatrix,
     glPushMatrix,
     glTranslatef,
+    glViewport,
     glVertex3f,
 )
 from OpenGL.GLU import gluLookAt, gluPerspective, gluProject, gluUnProject
@@ -79,6 +82,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glLightfv(GL_LIGHT0, GL_POSITION, [30.0, 40.0, 60.0, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
+        glViewport(0, 0, w, h)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         aspect = w / h if h else 1.0
@@ -94,8 +98,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         camera_z = camera_radius * math.sin(angle)
         gluLookAt(camera_x, 0.0, camera_z, 9.0, -4.0, 0.0, 0.0, 1.0, 0.0)
 
-        self._modelview = glGetDoublev(GL_MODELVIEW)
-        self._projection = glGetDoublev(GL_PROJECTION)
+        self._modelview = glGetDoublev(GL_MODELVIEW_MATRIX)
+        self._projection = glGetDoublev(GL_PROJECTION_MATRIX)
         self._viewport = glGetIntegerv(GL_VIEWPORT)
 
         for element in ELEMENTS:
