@@ -19,6 +19,7 @@ from OpenGL.GL import (
     GL_QUADS,
     GL_SHININESS,
     GL_SPECULAR,
+    GL_VIEWPORT,
     glBegin,
     glClear,
     glClearColor,
