@@ -64,12 +64,13 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._modelview = None
         self._projection = None
         self._viewport = None
-        self._cube_size = 0.9
-        self._x_spacing = 1.05
-        self._y_spacing = 1.05
+        self._cube_size = 1.1
+        self._x_spacing = 1.3
+        self._y_spacing = 1.3
         self._right_header_offset = 2.5
         self._left_header_offset = 2.0
         self._split_offset = 0.15
+        self._font_family = "Noto Sans CJK SC"
 
     def set_group_mode(self, mode: str) -> None:
         self.group_mode = mode
@@ -172,7 +173,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def _draw_group_headers(self, painter: QtGui.QPainter) -> None:
         labels = GROUP_LABELS[self.group_mode]
-        font = QtGui.QFont("Microsoft YaHei", 10, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
@@ -182,7 +183,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
                 painter.drawText(screen[0] - 14, screen[1] - 12, 28, 20, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
-        font = QtGui.QFont("Microsoft YaHei", 10, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for period in range(1, 8):
@@ -192,7 +193,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
                 painter.drawText(screen[0] - 12, screen[1] - 12, 24, 24, QtCore.Qt.AlignCenter, str(period))
 
     def _draw_right_headers(self, painter: QtGui.QPainter) -> None:
-        font = QtGui.QFont("Microsoft YaHei", 9, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._font_family, 10, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for period in range(1, 8):
@@ -207,7 +208,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
                 self._draw_vertical_stack(painter, shells_screen, shells)
 
     def _draw_vertical_stack(self, painter: QtGui.QPainter, pos: Tuple[int, int], items: List[str]) -> None:
-        line_height = 12
+        line_height = 14
         x, y = pos
         total_height = line_height * len(items)
         start_y = y - total_height + line_height
@@ -216,32 +217,60 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def _draw_element_text(self, painter: QtGui.QPainter, element: Element) -> None:
         position = self._element_position(element)
-        base = self._project_point(position[0], position[1], position[2] + self._cube_size / 2)
-        if not base:
+        half = self._cube_size / 2
+        front_z = position[2] + half
+        top_left = self._project_point(position[0] - half, position[1] + half, front_z)
+        bottom_right = self._project_point(position[0] + half, position[1] - half, front_z)
+        if not top_left or not bottom_right:
             return
-        x, y = base
+        left = min(top_left[0], bottom_right[0])
+        top = min(top_left[1], bottom_right[1])
+        rect = QtCore.QRectF(
+            left,
+            top,
+            max(1.0, abs(bottom_right[0] - top_left[0])),
+            max(1.0, abs(bottom_right[1] - top_left[1])),
+        )
         number = str(element.number)
         symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
 
-        font_small = QtGui.QFont("Microsoft YaHei", 8)
-        font_symbol = QtGui.QFont("Microsoft YaHei", 10, QtGui.QFont.Bold)
-        font_name = QtGui.QFont("Microsoft YaHei", 9)
+        font_small = QtGui.QFont(self._font_family, 9)
+        font_symbol = QtGui.QFont(self._font_family, 12, QtGui.QFont.Bold)
+        font_name = QtGui.QFont(self._font_family, 10)
+
+        padding = 4.0
+        inner_rect = rect.adjusted(padding, padding, -padding, -padding)
+
+        painter.save()
+        painter.setClipRect(inner_rect)
 
         painter.setFont(font_small)
         painter.setPen(QtGui.QColor(240, 240, 240))
-        painter.drawText(x - 38, y - 32, 30, 12, QtCore.Qt.AlignLeft, number)
+        top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), font_small.pointSizeF() + 6)
+        painter.drawText(top_line, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, number)
 
         painter.setFont(font_symbol)
         painter.setPen(symbol_color)
-        painter.drawText(x + 6, y - 34, 30, 14, QtCore.Qt.AlignRight, element.symbol)
+        painter.drawText(top_line, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, element.symbol)
 
         painter.setFont(font_name)
         painter.setPen(QtGui.QColor(240, 240, 240))
-        painter.drawText(x - 38, y - 8, 76, 16, QtCore.Qt.AlignCenter, element.name_cn)
+        name_line = QtCore.QRectF(
+            inner_rect.left(),
+            top_line.bottom(),
+            inner_rect.width(),
+            font_name.pointSizeF() + 8,
+        )
+        painter.drawText(name_line, QtCore.Qt.AlignCenter, element.name_cn)
 
         painter.setFont(font_small)
-        painter.drawText(x - 38, y + 8, 76, 12, QtCore.Qt.AlignCenter, "待补充")
-        painter.drawText(x - 38, y + 22, 76, 12, QtCore.Qt.AlignCenter, "待补充")
+        tail_line_height = font_small.pointSizeF() + 6
+        line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
+        line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
+        painter.drawText(line3, QtCore.Qt.AlignCenter, "待补充")
+        painter.drawText(line4, QtCore.Qt.AlignCenter, "待补充")
+
+        painter.restore()
 
     def _grid_to_world(self, group: int, period: int) -> Tuple[float, float, float]:
         x = (group - 1) * self._x_spacing
