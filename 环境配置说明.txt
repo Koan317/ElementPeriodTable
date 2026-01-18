@@ -1,0 +1,19 @@
+环境需求
+- Python 3.9+
+- PyQt5
+- PyOpenGL
+- PyOpenGL_accelerate（可选，用于提升渲染性能）
+
+安装步骤（Windows / macOS / Linux）
+1. 创建并激活虚拟环境（可选）
+   - Windows: python -m venv .venv && .\.venv\Scripts\activate
+   - macOS/Linux: python3 -m venv .venv && source .venv/bin/activate
+2. 安装依赖
+   pip install PyQt5 PyOpenGL PyOpenGL_accelerate
+
+运行方式
+- 直接执行：python ElementPeriodTable.py
+
+常见问题
+- 如果提示缺少 OpenGL 相关库，请升级显卡驱动或在系统中启用硬件加速。
+- 在部分 Linux 环境中需额外安装系统级依赖（如 mesa / libGL），请根据发行版文档补充安装。
