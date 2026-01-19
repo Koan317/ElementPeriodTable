@@ -215,10 +215,14 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             min_y = min(min_y, y)
             max_y = max(max_y, y)
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.25
-            if group in {1, 18}:
-                y += 0.35
+            periods = [
+                element.period
+                for element in ELEMENTS
+                if element.group == group and not self._is_block_placeholder(element)
+            ]
+            top_period = min(periods) if periods else 1
+            x, y, _ = self._grid_to_world(group, top_period)
+            y += self._cube_size / 2 - 0.25 + self._y_spacing
             min_x = min(min_x, x)
             max_x = max(max_x, x)
             min_y = min(min_y, y)
@@ -354,10 +358,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             ]
             top_period = min(periods) if periods else 1
             x, y, _ = self._grid_to_world(group, top_period)
-            y += self._cube_size / 2 - 0.25
+            y += self._cube_size / 2 - 0.25 + self._y_spacing
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 22, screen[1] - 108, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
