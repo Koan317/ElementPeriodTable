@@ -60,9 +60,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._modelview = None
         self._projection = None
         self._viewport = None
-        self._cube_size = 1.35
-        self._x_spacing = 1.55
-        self._y_spacing = 1.55
+        self._cube_size = 1.35 * 1.1
+        self._x_spacing = 1.55 * 1.1
+        self._y_spacing = 1.55 * 1.1
         self._right_header_offset = 0.0
         self._left_header_offset = 0.0
         self._font_family = "Noto Sans Mono CJK SC"
