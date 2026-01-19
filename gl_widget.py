@@ -66,7 +66,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._right_header_offset = 2.5
         self._left_header_offset = 2.0
         self._font_family = "Noto Sans Mono CJK SC"
-        self._margin_cells = 1.5
+        self._margin_cells = 1.2
         self._camera_radius = 38.0
         self._camera_angle = math.radians(78)
         self._camera_target = (9.0, -4.2, 0.0)
@@ -81,9 +81,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
-        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.35, 0.35, 0.35, 1.0])
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.0, 1.0, 1.0, 1.0])
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.18, 0.18, 0.18, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
@@ -120,8 +120,13 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = group_color(element.group, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.9, 0.9, 0.9, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [64.0])
+            specular = [0.9, 0.9, 0.9, 1.0]
+            shininess = [64.0]
+            if self._has_metal_radical(element.name_cn):
+                specular = [1.0, 1.0, 1.0, 1.0]
+                shininess = [96.0]
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [8.0])
@@ -316,14 +321,15 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def _draw_group_headers(self, painter: QtGui.QPainter) -> None:
         labels = GROUP_LABELS[self.group_mode]
-        font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._font_family, 9, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 0)
+            x, y, _ = self._grid_to_world(group, 1)
+            y += self._cube_size / 2 + 0.1
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 14, screen[1] - 12, 28, 20, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 22, screen[1] - 16, 44, 18, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
@@ -415,6 +421,107 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(line4, QtCore.Qt.AlignCenter, "待补充")
 
         painter.restore()
+
+    def _has_metal_radical(self, name: str) -> bool:
+        metal_radical_chars = {
+            "锂",
+            "铍",
+            "钠",
+            "镁",
+            "铝",
+            "钾",
+            "钙",
+            "钪",
+            "钛",
+            "钒",
+            "铬",
+            "锰",
+            "铁",
+            "钴",
+            "镍",
+            "铜",
+            "锌",
+            "镓",
+            "锗",
+            "铷",
+            "锶",
+            "钇",
+            "锆",
+            "铌",
+            "钼",
+            "锝",
+            "钌",
+            "铑",
+            "钯",
+            "银",
+            "镉",
+            "铟",
+            "锡",
+            "锑",
+            "铯",
+            "钡",
+            "镧",
+            "铈",
+            "镨",
+            "钕",
+            "钷",
+            "钐",
+            "铕",
+            "钆",
+            "铽",
+            "镝",
+            "钬",
+            "铒",
+            "铥",
+            "镱",
+            "镥",
+            "铪",
+            "钽",
+            "钨",
+            "铼",
+            "锇",
+            "铱",
+            "铂",
+            "金",
+            "汞",
+            "铊",
+            "铅",
+            "铋",
+            "钋",
+            "钫",
+            "镭",
+            "锕",
+            "钍",
+            "镤",
+            "铀",
+            "镎",
+            "钚",
+            "镅",
+            "锔",
+            "锫",
+            "锎",
+            "锿",
+            "镄",
+            "钔",
+            "锘",
+            "铹",
+            "𬬻",
+            "𬭊",
+            "𬭳",
+            "𬭛",
+            "𬭶",
+            "鿏",
+            "𫟼",
+            "𬬭",
+            "鿔",
+            "鿭",
+            "𫟷",
+            "镆",
+            "鉝",
+            "鿬",
+            "鿫",
+        }
+        return any(char in metal_radical_chars for char in name)
 
     def _grid_to_world(self, group: int, period: int) -> Tuple[float, float, float]:
         x = (group - 1) * self._x_spacing

@@ -11,11 +11,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         central = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout(central)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(6)
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(4)
 
         left_panel = QtWidgets.QFrame()
-        left_panel.setFixedWidth(130)
+        left_panel_width = 160
+        left_panel.setFixedWidth(left_panel_width)
         left_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
         left_panel.setVisible(True)
         left_layout = QtWidgets.QVBoxLayout(left_panel)
@@ -25,7 +26,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left_layout.addWidget(left_label)
 
         left_toggle = QtWidgets.QToolButton()
-        left_toggle.setFixedWidth(10)
+        left_toggle.setFixedWidth(12)
         left_toggle.setCheckable(True)
         left_toggle.setChecked(True)
         left_toggle.setStyleSheet(
@@ -40,7 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
         center_layout.addWidget(gl_widget)
 
         right_toggle = QtWidgets.QToolButton()
-        right_toggle.setFixedWidth(10)
+        right_toggle.setFixedWidth(12)
         right_toggle.setCheckable(True)
         right_toggle.setChecked(True)
         right_toggle.setStyleSheet(
@@ -49,7 +50,8 @@ class MainWindow(QtWidgets.QMainWindow):
         )
 
         right_panel = QtWidgets.QFrame()
-        right_panel.setFixedWidth(120)
+        right_panel_width = 150
+        right_panel.setFixedWidth(right_panel_width)
         right_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
         right_panel.setVisible(True)
         right_layout = QtWidgets.QVBoxLayout(right_panel)
@@ -81,11 +83,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         def toggle_left_panel(checked: bool) -> None:
             left_panel.setVisible(checked)
-            left_panel.setFixedWidth(130 if checked else 0)
+            left_panel.setFixedWidth(left_panel_width if checked else 0)
 
         def toggle_right_panel(checked: bool) -> None:
             right_panel.setVisible(checked)
-            right_panel.setFixedWidth(120 if checked else 0)
+            right_panel.setFixedWidth(right_panel_width if checked else 0)
 
         left_toggle.toggled.connect(toggle_left_panel)
         right_toggle.toggled.connect(toggle_right_panel)
