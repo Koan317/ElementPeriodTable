@@ -5,11 +5,14 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QOpenGLWidget
 from OpenGL.GL import (
     GL_AMBIENT_AND_DIFFUSE,
+    GL_AMBIENT,
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
     GL_DEPTH_TEST,
+    GL_DIFFUSE,
     GL_FRONT_AND_BACK,
     GL_LIGHT0,
+    GL_LIGHT_MODEL_AMBIENT,
     GL_LIGHTING,
     GL_MODELVIEW,
     GL_MODELVIEW_MATRIX,
@@ -29,6 +32,7 @@ from OpenGL.GL import (
     glGetDoublev,
     glGetIntegerv,
     glLightfv,
+    glLightModelfv,
     glLoadIdentity,
     glMaterialfv,
     glMatrixMode,
@@ -77,7 +81,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
-        glLightfv(GL_LIGHT0, GL_AMBIENT_AND_DIFFUSE, [1.1, 1.1, 1.1, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.35, 0.35, 0.35, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.0, 1.0, 1.0, 1.0])
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.18, 0.18, 0.18, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
