@@ -587,6 +587,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         font_small = QtGui.QFont(self._font_family, 11)
         font_symbol = QtGui.QFont(self._symbol_font_family, 14, QtGui.QFont.Bold)
         font_name = QtGui.QFont(self._font_family, 12)
+        font_valence = QtGui.QFont(self._font_family, 10)
+        font_valence.setStretch(QtGui.QFont.Condensed)
 
         padding = 2.0
         inner_rect = rect.adjusted(padding, padding, -padding, -padding)
@@ -620,6 +622,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
         painter.drawText(line3, QtCore.Qt.AlignCenter, atomic_weight(element.symbol))
+        painter.setFont(font_valence)
         painter.drawText(line4, QtCore.Qt.AlignCenter, valence_electron_config(element.symbol))
 
         painter.restore()
