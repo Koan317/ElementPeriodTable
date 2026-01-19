@@ -46,7 +46,7 @@ from OpenGL.GL import (
 )
 from OpenGL.GLU import gluLookAt, gluProject, gluUnProject
 
-from element_data import ELEMENTS, GROUP_LABELS, PERIOD_NOBLE_GAS_SHELLS, RADIOACTIVE, Element, group_color, is_metal
+from element_data import ELEMENTS, GROUP_LABELS, PERIOD_NOBLE_GAS_SHELLS, RADIOACTIVE, Element, element_color, is_metal
 
 
 class PeriodicTableGLWidget(QOpenGLWidget):
@@ -63,10 +63,11 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._cube_size = 1.35
         self._x_spacing = 1.55
         self._y_spacing = 1.55
-        self._right_header_offset = 2.5
-        self._left_header_offset = 2.0
+        self._right_header_offset = 1.6
+        self._left_header_offset = 1.2
         self._font_family = "Noto Sans Mono CJK SC"
-        self._margin_cells = 1.2
+        self._group_font_family = "Noto Sans CJK SC"
+        self._margin_cells = 1.0
         self._camera_radius = 38.0
         self._camera_angle = math.radians(78)
         self._camera_target = (9.0, -4.2, 0.0)
@@ -117,7 +118,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._draw_overlay()
 
     def _apply_material(self, element: Element) -> None:
-        color = group_color(element.group, self.group_mode)
+        color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
             specular = [0.9, 0.9, 0.9, 1.0]
@@ -206,13 +207,12 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         max_x = float("-inf")
         min_y = float("inf")
         max_y = float("-inf")
-        for group in range(0, 21):
-            for period in range(0, 8):
-                x, y, _ = self._grid_to_world(group, period)
-                min_x = min(min_x, x)
-                max_x = max(max_x, x)
-                min_y = min(min_y, y)
-                max_y = max(max_y, y)
+        for element in ELEMENTS:
+            x, y, _ = self._element_position(element)
+            min_x = min(min_x, x)
+            max_x = max(max_x, x)
+            min_y = min(min_y, y)
+            max_y = max(max_y, y)
         half = self._cube_size / 2
         return min_x - half, max_x + half, min_y - half, max_y + half
 
@@ -321,15 +321,15 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def _draw_group_headers(self, painter: QtGui.QPainter) -> None:
         labels = GROUP_LABELS[self.group_mode]
-        font = QtGui.QFont(self._font_family, 9, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._group_font_family, 8, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
             x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 + 0.1
+            y += self._cube_size / 2 - 0.05
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 22, screen[1] - 16, 44, 18, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 20, screen[1] - 14, 40, 16, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
@@ -537,7 +537,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
     def _element_position(self, element: Element) -> Tuple[float, float, float]:
         group = element.group
         period = element.period
-        return self._grid_to_world(group, period)
+        x, y, z = self._grid_to_world(group, period)
+        if element.series in {"镧系", "锕系"}:
+            y -= self._y_spacing * 0.5
+        return x, y, z
 
     def _project_point(self, x: float, y: float, z: float) -> Optional[Tuple[int, int]]:
         if self._modelview is None or self._projection is None or self._viewport is None:
