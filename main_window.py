@@ -24,11 +24,29 @@ class MainWindow(QtWidgets.QMainWindow):
         left_label.setStyleSheet("color: #EDEDED; font-size: 16px; font-weight: bold;")
         left_layout.addWidget(left_label)
 
+        left_toggle = QtWidgets.QToolButton()
+        left_toggle.setFixedWidth(10)
+        left_toggle.setCheckable(True)
+        left_toggle.setChecked(True)
+        left_toggle.setStyleSheet(
+            "QToolButton { background-color: #1C2731; border: none; }"
+            "QToolButton:hover { background-color: #2A3948; }"
+        )
+
         center_panel = QtWidgets.QFrame()
         center_layout = QtWidgets.QVBoxLayout(center_panel)
         center_layout.setContentsMargins(0, 0, 0, 0)
         gl_widget = PeriodicTableGLWidget()
         center_layout.addWidget(gl_widget)
+
+        right_toggle = QtWidgets.QToolButton()
+        right_toggle.setFixedWidth(10)
+        right_toggle.setCheckable(True)
+        right_toggle.setChecked(True)
+        right_toggle.setStyleSheet(
+            "QToolButton { background-color: #1C2731; border: none; }"
+            "QToolButton:hover { background-color: #2A3948; }"
+        )
 
         right_panel = QtWidgets.QFrame()
         right_panel.setFixedWidth(120)
@@ -61,7 +79,20 @@ class MainWindow(QtWidgets.QMainWindow):
             group.addButton(btn)
             right_layout.addWidget(btn)
 
+        def toggle_left_panel(checked: bool) -> None:
+            left_panel.setVisible(checked)
+            left_panel.setFixedWidth(130 if checked else 0)
+
+        def toggle_right_panel(checked: bool) -> None:
+            right_panel.setVisible(checked)
+            right_panel.setFixedWidth(120 if checked else 0)
+
+        left_toggle.toggled.connect(toggle_left_panel)
+        right_toggle.toggled.connect(toggle_right_panel)
+
         layout.addWidget(left_panel)
+        layout.addWidget(left_toggle)
         layout.addWidget(center_panel, stretch=1)
+        layout.addWidget(right_toggle)
         layout.addWidget(right_panel)
         self.setCentralWidget(central)
