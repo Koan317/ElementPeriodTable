@@ -384,18 +384,34 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             y_shell = y_num
             numbers_screen = self._project_point(x_num, y_num, 0.0)
             shells_screen = self._project_point(x_shell, y_shell, 0.0)
-            if numbers_screen:
-                self._draw_vertical_stack(painter, numbers_screen, numbers)
-            if shells_screen:
-                self._draw_vertical_stack(painter, shells_screen, shells)
+            top_screen = self._project_point(x_num, y_num + self._y_spacing / 2, 0.0)
+            bottom_screen = self._project_point(x_num, y_num - self._y_spacing / 2, 0.0)
+            if numbers_screen and top_screen and bottom_screen:
+                self._draw_vertical_stack(painter, numbers_screen[0], top_screen[1], bottom_screen[1], numbers)
+            if shells_screen and top_screen and bottom_screen:
+                self._draw_vertical_stack(painter, shells_screen[0], top_screen[1], bottom_screen[1], shells)
 
-    def _draw_vertical_stack(self, painter: QtGui.QPainter, pos: Tuple[int, int], items: List[str]) -> None:
-        line_height = 14
-        x, y = pos
-        total_height = line_height * len(items)
-        start_y = y - total_height + line_height
+    def _draw_vertical_stack(
+        self,
+        painter: QtGui.QPainter,
+        x: int,
+        top: int,
+        bottom: int,
+        items: List[str],
+    ) -> None:
+        if not items:
+            return
+        top_y = min(top, bottom)
+        bottom_y = max(top, bottom)
+        line_height = (bottom_y - top_y) / len(items)
         for idx, item in enumerate(items):
-            painter.drawText(x - 10, start_y + idx * line_height, 20, line_height, QtCore.Qt.AlignCenter, item)
+            rect = QtCore.QRectF(
+                x - 10,
+                top_y + idx * line_height,
+                20,
+                line_height,
+            )
+            painter.drawText(rect, QtCore.Qt.AlignCenter, item)
 
     def _draw_element_text(self, painter: QtGui.QPainter, element: Element) -> None:
         position = self._element_position(element)
