@@ -401,7 +401,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
     ) -> None:
         if not items:
             return
-        top_y = min(top, bottom)
         bottom_y = max(top, bottom)
         font_metrics = painter.fontMetrics()
         line_height = font_metrics.height()
