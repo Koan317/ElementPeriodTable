@@ -63,8 +63,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._cube_size = 1.35
         self._x_spacing = 1.55
         self._y_spacing = 1.55
-        self._right_header_offset = 1.2
-        self._left_header_offset = 0.9
+        self._right_header_offset = 0.0
+        self._left_header_offset = 0.0
         self._font_family = "Noto Sans Mono CJK SC"
         self._symbol_font_family = "Noto Sans CJK SC"
         self._group_font_family = "Noto Sans CJK SC"
@@ -327,7 +327,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
             x, y, _ = self._grid_to_world(group, 0)
-            y += 0.05
+            y += 0.0
             screen = self._project_point(x, y, 0.0)
             if screen:
                 painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
@@ -537,7 +537,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         x = (group - 1) * self._x_spacing
         y = -(period - 1) * self._y_spacing
         if period == 0:
-            y += 0.7
+            y += self._y_spacing
         if group == 0:
             x -= self._left_header_offset
         if group >= 19:
