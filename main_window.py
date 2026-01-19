@@ -11,16 +11,28 @@ class MainWindow(QtWidgets.QMainWindow):
 
         central = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout(central)
-        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setContentsMargins(2, 2, 2, 2)
+        layout.setSpacing(4)
 
         left_panel = QtWidgets.QFrame()
-        left_panel.setFixedWidth(180)
+        left_panel_width = 160
+        left_panel.setFixedWidth(left_panel_width)
         left_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
+        left_panel.setVisible(True)
         left_layout = QtWidgets.QVBoxLayout(left_panel)
         left_layout.setAlignment(QtCore.Qt.AlignTop)
         left_label = QtWidgets.QLabel("功能区域")
         left_label.setStyleSheet("color: #EDEDED; font-size: 16px; font-weight: bold;")
         left_layout.addWidget(left_label)
+
+        left_toggle = QtWidgets.QToolButton()
+        left_toggle.setFixedWidth(12)
+        left_toggle.setCheckable(True)
+        left_toggle.setChecked(True)
+        left_toggle.setStyleSheet(
+            "QToolButton { background-color: #1C2731; border: none; }"
+            "QToolButton:hover { background-color: #2A3948; }"
+        )
 
         center_panel = QtWidgets.QFrame()
         center_layout = QtWidgets.QVBoxLayout(center_panel)
@@ -28,9 +40,20 @@ class MainWindow(QtWidgets.QMainWindow):
         gl_widget = PeriodicTableGLWidget()
         center_layout.addWidget(gl_widget)
 
+        right_toggle = QtWidgets.QToolButton()
+        right_toggle.setFixedWidth(12)
+        right_toggle.setCheckable(True)
+        right_toggle.setChecked(True)
+        right_toggle.setStyleSheet(
+            "QToolButton { background-color: #1C2731; border: none; }"
+            "QToolButton:hover { background-color: #2A3948; }"
+        )
+
         right_panel = QtWidgets.QFrame()
-        right_panel.setFixedWidth(160)
+        right_panel_width = 150
+        right_panel.setFixedWidth(right_panel_width)
         right_panel.setStyleSheet("background-color: #111921; border-radius: 6px;")
+        right_panel.setVisible(True)
         right_layout = QtWidgets.QVBoxLayout(right_panel)
         right_layout.setAlignment(QtCore.Qt.AlignTop)
         right_layout.setSpacing(12)
@@ -58,7 +81,20 @@ class MainWindow(QtWidgets.QMainWindow):
             group.addButton(btn)
             right_layout.addWidget(btn)
 
+        def toggle_left_panel(checked: bool) -> None:
+            left_panel.setVisible(checked)
+            left_panel.setFixedWidth(left_panel_width if checked else 0)
+
+        def toggle_right_panel(checked: bool) -> None:
+            right_panel.setVisible(checked)
+            right_panel.setFixedWidth(right_panel_width if checked else 0)
+
+        left_toggle.toggled.connect(toggle_left_panel)
+        right_toggle.toggled.connect(toggle_right_panel)
+
         layout.addWidget(left_panel)
+        layout.addWidget(left_toggle)
         layout.addWidget(center_panel, stretch=1)
+        layout.addWidget(right_toggle)
         layout.addWidget(right_panel)
         self.setCentralWidget(central)
