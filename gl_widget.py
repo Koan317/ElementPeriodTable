@@ -120,10 +120,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         gluQuadricNormals(self._quadric, GLU_SMOOTH)
         glDisable(GL_BLEND)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
-        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
-        glLightfv(GL_LIGHT0, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.25, 0.25, 0.25, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.85, 0.85, 0.85, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.7, 0.7, 0.7, 1.0])
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.12, 0.12, 0.12, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
@@ -243,40 +243,40 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         glBegin(GL_QUADS)
         glNormal3f(0.0, 0.0, 1.0)
-        glVertex3f(-face_extent, -face_extent, half)
-        glVertex3f(face_extent, -face_extent, half)
-        glVertex3f(face_extent, face_extent, half)
-        glVertex3f(-face_extent, face_extent, half)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
 
         glNormal3f(0.0, 0.0, -1.0)
-        glVertex3f(-face_extent, -face_extent, -half)
-        glVertex3f(-face_extent, face_extent, -half)
-        glVertex3f(face_extent, face_extent, -half)
-        glVertex3f(face_extent, -face_extent, -half)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
 
         glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-face_extent, half, -face_extent)
-        glVertex3f(-face_extent, half, face_extent)
-        glVertex3f(face_extent, half, face_extent)
-        glVertex3f(face_extent, half, -face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
 
         glNormal3f(0.0, -1.0, 0.0)
-        glVertex3f(-face_extent, -half, -face_extent)
-        glVertex3f(face_extent, -half, -face_extent)
-        glVertex3f(face_extent, -half, face_extent)
-        glVertex3f(-face_extent, -half, face_extent)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
 
         glNormal3f(1.0, 0.0, 0.0)
-        glVertex3f(half, -face_extent, -face_extent)
-        glVertex3f(half, face_extent, -face_extent)
-        glVertex3f(half, face_extent, face_extent)
-        glVertex3f(half, -face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
 
         glNormal3f(-1.0, 0.0, 0.0)
-        glVertex3f(-half, -face_extent, -face_extent)
-        glVertex3f(-half, -face_extent, face_extent)
-        glVertex3f(-half, face_extent, face_extent)
-        glVertex3f(-half, face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
         glEnd()
 
         if self._quadric is None:
@@ -575,14 +575,14 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         if self._is_block_placeholder(element):
             font = QtGui.QFont(self._group_font_family, 12, QtGui.QFont.Bold)
             painter.setFont(font)
-            painter.setPen(QtGui.QColor(245, 245, 245))
+            painter.setPen(QtGui.QColor(15, 15, 15))
             label = "镧系" if element.symbol == "La" else "锕系"
             painter.drawText(rect, QtCore.Qt.AlignCenter, label)
             painter.restore()
             return
 
         number = str(element.number)
-        symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
+        symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(15, 15, 15)
 
         font_small = QtGui.QFont(self._font_family, 11)
         font_symbol = QtGui.QFont(self._symbol_font_family, 14, QtGui.QFont.Bold)
@@ -595,7 +595,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setClipRect(inner_rect)
 
         painter.setFont(font_small)
-        painter.setPen(QtGui.QColor(240, 240, 240))
+        painter.setPen(QtGui.QColor(15, 15, 15))
         top_line_height = max(font_small.pointSizeF() + 8, font_symbol.pointSizeF() + 14)
         top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), top_line_height)
         painter.drawText(top_line, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, number)
@@ -605,7 +605,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(top_line, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, element.symbol)
 
         painter.setFont(font_name)
-        painter.setPen(QtGui.QColor(240, 240, 240))
+        painter.setPen(QtGui.QColor(15, 15, 15))
         name_line = QtCore.QRectF(
             inner_rect.left(),
             top_line.bottom(),
@@ -615,6 +615,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(name_line, QtCore.Qt.AlignCenter, element.name_cn)
 
         painter.setFont(font_small)
+        painter.setPen(QtGui.QColor(15, 15, 15))
         tail_line_height = font_small.pointSizeF() + 10
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
