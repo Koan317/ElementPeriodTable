@@ -172,8 +172,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.0, 0.0, 0.0, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [0.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.12, 0.12, 0.12, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [6.0])
 
     def _draw_cube(self, size: float) -> None:
         half = size / 2
@@ -243,40 +243,40 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         glBegin(GL_QUADS)
         glNormal3f(0.0, 0.0, 1.0)
-        glVertex3f(-face_extent, -face_extent, half)
-        glVertex3f(face_extent, -face_extent, half)
-        glVertex3f(face_extent, face_extent, half)
-        glVertex3f(-face_extent, face_extent, half)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
 
         glNormal3f(0.0, 0.0, -1.0)
-        glVertex3f(-face_extent, -face_extent, -half)
-        glVertex3f(-face_extent, face_extent, -half)
-        glVertex3f(face_extent, face_extent, -half)
-        glVertex3f(face_extent, -face_extent, -half)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
 
         glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-face_extent, half, -face_extent)
-        glVertex3f(-face_extent, half, face_extent)
-        glVertex3f(face_extent, half, face_extent)
-        glVertex3f(face_extent, half, -face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
 
         glNormal3f(0.0, -1.0, 0.0)
-        glVertex3f(-face_extent, -half, -face_extent)
-        glVertex3f(face_extent, -half, -face_extent)
-        glVertex3f(face_extent, -half, face_extent)
-        glVertex3f(-face_extent, -half, face_extent)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
 
         glNormal3f(1.0, 0.0, 0.0)
-        glVertex3f(half, -face_extent, -face_extent)
-        glVertex3f(half, face_extent, -face_extent)
-        glVertex3f(half, face_extent, face_extent)
-        glVertex3f(half, -face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
 
         glNormal3f(-1.0, 0.0, 0.0)
-        glVertex3f(-half, -face_extent, -face_extent)
-        glVertex3f(-half, -face_extent, face_extent)
-        glVertex3f(-half, face_extent, face_extent)
-        glVertex3f(-half, face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
         glEnd()
 
         if self._quadric is None:
@@ -622,7 +622,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
         painter.drawText(line3, QtCore.Qt.AlignCenter, atomic_weight(element.symbol))
-        painter.setFont(font_valence)
         painter.drawText(line4, QtCore.Qt.AlignCenter, valence_electron_config(element.symbol))
 
         painter.restore()
