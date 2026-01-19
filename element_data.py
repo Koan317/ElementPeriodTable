@@ -36,43 +36,43 @@ GROUP_COLORS_IUPAC: Dict[int, Tuple[int, int, int]] = {
 GROUP_LABELS = {
     "iupac": [str(i) for i in range(1, 19)],
     "cas": [
-        "IA",
-        "IIA",
-        "IIIB",
-        "IVB",
-        "VB",
-        "VIB",
-        "VIIB",
-        "VIIIB",
-        "VIIIB",
-        "VIIIB",
-        "IB",
-        "IIB",
-        "IIIA",
-        "IVA",
-        "VA",
-        "VIA",
-        "VIIA",
-        "VIIIA",
+        "ⅠA",
+        "ⅡA",
+        "ⅢB",
+        "ⅣB",
+        "ⅤB",
+        "ⅥB",
+        "ⅦB",
+        "ⅧB",
+        "ⅧB",
+        "ⅧB",
+        "ⅠB",
+        "ⅡB",
+        "ⅢA",
+        "ⅣA",
+        "ⅤA",
+        "ⅥA",
+        "ⅦA",
+        "ⅧA",
     ],
     "cn": [
-        "IA",
-        "IIA",
-        "IIIB",
-        "IVB",
-        "VB",
-        "VIB",
-        "VIIB",
-        "VIII B",
-        "VIII B",
-        "VIII B",
-        "IB",
-        "IIB",
-        "IIIA",
-        "IVA",
-        "VA",
-        "VIA",
-        "VIIA",
+        "ⅠA",
+        "ⅡA",
+        "ⅢB",
+        "ⅣB",
+        "ⅤB",
+        "ⅥB",
+        "ⅦB",
+        "ⅧB",
+        "ⅧB",
+        "ⅧB",
+        "ⅠB",
+        "ⅡB",
+        "ⅢA",
+        "ⅣA",
+        "ⅤA",
+        "ⅥA",
+        "ⅦA",
         "0",
     ],
 }
@@ -351,9 +351,9 @@ ELEMENT_NAMES_CN = [
     "𬬭",
     "鿔",
     "鿭",
-    "𫟷",
+    "𫓧",
     "镆",
-    "鉝",
+    "𫟷",
     "鿬",
     "鿫",
 ]
@@ -454,13 +454,28 @@ def is_metal(symbol: str) -> bool:
     return True
 
 
+F_BLOCK_LANTH_COLOR = (96, 200, 191)
+F_BLOCK_ACTIN_COLOR = (85, 107, 47)
+
+
 def group_color(group: int, mode: str) -> Tuple[float, float, float]:
-    mapped_group = group
     if mode in {"cas", "cn"} and group in {8, 9, 10}:
         rgb = (123, 141, 154)
     else:
-        rgb = GROUP_COLORS_IUPAC.get(mapped_group, (180, 180, 180))
+        rgb = GROUP_COLORS_IUPAC.get(group, (180, 180, 180))
     return tuple(channel / 255.0 for channel in rgb)
+
+
+def element_color(element: Element, mode: str) -> Tuple[float, float, float]:
+    if element.series == "镧系":
+        if mode == "iupac" and element.symbol == "La":
+            return group_color(3, mode)
+        return tuple(channel / 255.0 for channel in F_BLOCK_LANTH_COLOR)
+    if element.series == "锕系":
+        if mode == "iupac" and element.symbol == "Ac":
+            return group_color(3, mode)
+        return tuple(channel / 255.0 for channel in F_BLOCK_ACTIN_COLOR)
+    return group_color(element.group, mode)
 
 
 ELEMENTS = build_elements()
