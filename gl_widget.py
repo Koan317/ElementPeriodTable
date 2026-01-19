@@ -40,6 +40,7 @@ from OpenGL.GL import (
     glOrtho,
     glPopMatrix,
     glPushMatrix,
+    glRotatef,
     glTranslatef,
     glViewport,
     glVertex3f,
