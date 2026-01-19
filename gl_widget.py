@@ -16,10 +16,13 @@ from OpenGL.GL import (
     GL_LIGHTING,
     GL_MODELVIEW,
     GL_MODELVIEW_MATRIX,
+    GL_NORMALIZE,
     GL_POSITION,
     GL_PROJECTION,
     GL_PROJECTION_MATRIX,
     GL_QUADS,
+    GL_BLEND,
+    GL_SMOOTH,
     GL_SHININESS,
     GL_SPECULAR,
     GL_VIEWPORT,
@@ -27,6 +30,7 @@ from OpenGL.GL import (
     glClear,
     glClearColor,
     glDisable,
+    glDepthMask,
     glEnable,
     glEnd,
     glGetDoublev,
@@ -40,13 +44,38 @@ from OpenGL.GL import (
     glOrtho,
     glPopMatrix,
     glPushMatrix,
+    glRotatef,
+    glShadeModel,
     glTranslatef,
     glViewport,
     glVertex3f,
 )
-from OpenGL.GLU import gluLookAt, gluProject, gluUnProject
+from OpenGL.GLU import (
+    GLU_FILL,
+    GLU_OUTSIDE,
+    GLU_SMOOTH,
+    gluCylinder,
+    gluLookAt,
+    gluNewQuadric,
+    gluQuadricDrawStyle,
+    gluQuadricOrientation,
+    gluProject,
+    gluQuadricNormals,
+    gluSphere,
+    gluUnProject,
+)
 
-from element_data import ELEMENTS, GROUP_LABELS, PERIOD_NOBLE_GAS_SHELLS, RADIOACTIVE, Element, element_color, is_metal
+from element_data import (
+    ELEMENTS,
+    GROUP_LABELS,
+    PERIOD_NOBLE_GAS_SHELLS,
+    RADIOACTIVE,
+    Element,
+    atomic_weight,
+    element_color,
+    is_metal,
+    valence_electron_config,
+)
 
 
 class PeriodicTableGLWidget(QOpenGLWidget):
@@ -72,6 +101,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._camera_radius = 38.0
         self._camera_angle = math.radians(78)
         self._camera_target = (9.0, -4.2, 0.0)
+        self._quadric = None
 
     def set_group_mode(self, mode: str) -> None:
         self.group_mode = mode
@@ -82,10 +112,18 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
+        glEnable(GL_NORMALIZE)
+        glShadeModel(GL_SMOOTH)
+        self._quadric = gluNewQuadric()
+        gluQuadricDrawStyle(self._quadric, GLU_FILL)
+        gluQuadricOrientation(self._quadric, GLU_OUTSIDE)
+        gluQuadricNormals(self._quadric, GLU_SMOOTH)
+        glDisable(GL_BLEND)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
-        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
-        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
+        glLightfv(GL_LIGHT0, GL_AMBIENT, [0.25, 0.25, 0.25, 1.0])
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, [0.85, 0.85, 0.85, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [0.7, 0.7, 0.7, 1.0])
+        glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.12, 0.12, 0.12, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
         glViewport(0, 0, w, h)
@@ -97,6 +135,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def paintGL(self) -> None:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glEnable(GL_DEPTH_TEST)
+        glDepthMask(True)
+        glDisable(GL_BLEND)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         camera_x, camera_z = self._camera_position()
@@ -113,7 +154,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             glPushMatrix()
             glTranslatef(position[0], position[1], position[2] + z_offset)
             self._apply_material(element)
-            self._draw_cube(self._cube_size)
+            corner_radius = self._corner_radius_world(position)
+            self._draw_rounded_cube(self._cube_size, corner_radius)
             glPopMatrix()
 
         self._draw_overlay()
@@ -122,16 +164,16 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            specular = [0.9, 0.9, 0.9, 1.0]
-            shininess = [64.0]
+            specular = [0.95, 0.95, 0.95, 1.0]
+            shininess = [96.0]
             if self._has_metal_radical(element.name_cn):
                 specular = [1.0, 1.0, 1.0, 1.0]
-                shininess = [96.0]
+                shininess = [120.0]
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [8.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.12, 0.12, 0.12, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [6.0])
 
     def _draw_cube(self, size: float) -> None:
         half = size / 2
@@ -172,6 +214,104 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glVertex3f(-half, half, half)
         glVertex3f(-half, half, -half)
         glEnd()
+
+    def _corner_radius_world(self, position: Tuple[float, float, float]) -> float:
+        if self._modelview is None or self._projection is None or self._viewport is None:
+            return self._cube_size * 0.08
+        half = self._cube_size / 2
+        front_z = position[2] + half
+        top_left = self._project_point(position[0] - half, position[1] + half, front_z)
+        bottom_right = self._project_point(position[0] + half, position[1] - half, front_z)
+        if not top_left or not bottom_right:
+            return self._cube_size * 0.08
+        pixel_width = max(1.0, abs(bottom_right[0] - top_left[0]))
+        radius = (7.0 / pixel_width) * self._cube_size
+        max_radius = self._cube_size / 2 - 0.02
+        return max(0.02, min(radius, max_radius))
+
+    def _draw_rounded_cube(self, size: float, radius: float, segments: int = 24) -> None:
+        if radius <= 0:
+            self._draw_cube(size)
+            return
+        inner = size - 2 * radius
+        if inner <= 0:
+            self._draw_cube(size)
+            return
+        half = size / 2
+        face_extent = half - radius
+        inner = face_extent * 2
+
+        glBegin(GL_QUADS)
+        glNormal3f(0.0, 0.0, 1.0)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+
+        glNormal3f(0.0, 0.0, -1.0)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+
+        glNormal3f(0.0, 1.0, 0.0)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+
+        glNormal3f(0.0, -1.0, 0.0)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+
+        glNormal3f(1.0, 0.0, 0.0)
+        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(face_extent, face_extent, face_extent)
+        glVertex3f(face_extent, -face_extent, face_extent)
+
+        glNormal3f(-1.0, 0.0, 0.0)
+        glVertex3f(-face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, face_extent, -face_extent)
+        glEnd()
+
+        if self._quadric is None:
+            return
+
+        for y in (-face_extent, face_extent):
+            for z in (-face_extent, face_extent):
+                glPushMatrix()
+                glTranslatef(-face_extent, y, z)
+                glRotatef(90, 0, 1, 0)
+                gluCylinder(self._quadric, radius, radius, inner, segments, 1)
+                glPopMatrix()
+
+        for x in (-face_extent, face_extent):
+            for z in (-face_extent, face_extent):
+                glPushMatrix()
+                glTranslatef(x, -face_extent, z)
+                glRotatef(-90, 1, 0, 0)
+                gluCylinder(self._quadric, radius, radius, inner, segments, 1)
+                glPopMatrix()
+
+        for x in (-face_extent, face_extent):
+            for y in (-face_extent, face_extent):
+                glPushMatrix()
+                glTranslatef(x, y, -face_extent)
+                gluCylinder(self._quadric, radius, radius, inner, segments, 1)
+                glPopMatrix()
+
+        for x in (-face_extent, face_extent):
+            for y in (-face_extent, face_extent):
+                for z in (-face_extent, face_extent):
+                    glPushMatrix()
+                    glTranslatef(x, y, z)
+                    gluSphere(self._quadric, radius, segments, segments)
+                    glPopMatrix()
 
     def _camera_position(self) -> Tuple[float, float]:
         camera_x = self._camera_radius * math.cos(self._camera_angle)
@@ -435,14 +575,14 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         if self._is_block_placeholder(element):
             font = QtGui.QFont(self._group_font_family, 12, QtGui.QFont.Bold)
             painter.setFont(font)
-            painter.setPen(QtGui.QColor(245, 245, 245))
+            painter.setPen(QtGui.QColor(15, 15, 15))
             label = "镧系" if element.symbol == "La" else "锕系"
             painter.drawText(rect, QtCore.Qt.AlignCenter, label)
             painter.restore()
             return
 
         number = str(element.number)
-        symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
+        symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(15, 15, 15)
 
         font_small = QtGui.QFont(self._font_family, 11)
         font_symbol = QtGui.QFont(self._symbol_font_family, 14, QtGui.QFont.Bold)
@@ -455,7 +595,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setClipRect(inner_rect)
 
         painter.setFont(font_small)
-        painter.setPen(QtGui.QColor(240, 240, 240))
+        painter.setPen(QtGui.QColor(15, 15, 15))
         top_line_height = max(font_small.pointSizeF() + 8, font_symbol.pointSizeF() + 14)
         top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), top_line_height)
         painter.drawText(top_line, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, number)
@@ -465,7 +605,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(top_line, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter, element.symbol)
 
         painter.setFont(font_name)
-        painter.setPen(QtGui.QColor(240, 240, 240))
+        painter.setPen(QtGui.QColor(15, 15, 15))
         name_line = QtCore.QRectF(
             inner_rect.left(),
             top_line.bottom(),
@@ -475,11 +615,12 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(name_line, QtCore.Qt.AlignCenter, element.name_cn)
 
         painter.setFont(font_small)
+        painter.setPen(QtGui.QColor(15, 15, 15))
         tail_line_height = font_small.pointSizeF() + 10
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
-        painter.drawText(line3, QtCore.Qt.AlignCenter, "待补充")
-        painter.drawText(line4, QtCore.Qt.AlignCenter, "待补充")
+        painter.drawText(line3, QtCore.Qt.AlignCenter, atomic_weight(element.symbol))
+        painter.drawText(line4, QtCore.Qt.AlignCenter, valence_electron_config(element.symbol))
 
         painter.restore()
 
