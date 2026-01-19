@@ -60,9 +60,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._modelview = None
         self._projection = None
         self._viewport = None
-        self._cube_size = 1.35
-        self._x_spacing = 1.55
-        self._y_spacing = 1.55
+        self._cube_size = 1.35 * 1.1
+        self._x_spacing = 1.55 * 1.1
+        self._y_spacing = 1.55 * 1.1
         self._right_header_offset = 0.0
         self._left_header_offset = 0.0
         self._font_family = "Noto Sans Mono CJK SC"
@@ -215,10 +215,14 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             min_y = min(min_y, y)
             max_y = max(max_y, y)
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.25
-            if group in {1, 18}:
-                y += 0.35
+            periods = [
+                element.period
+                for element in ELEMENTS
+                if element.group == group and not self._is_block_placeholder(element)
+            ]
+            top_period = min(periods) if periods else 1
+            x, y, _ = self._grid_to_world(group, top_period)
+            y += self._cube_size / 2 - 0.25 + self._y_spacing * 0.5
             min_x = min(min_x, x)
             max_x = max(max_x, x)
             min_y = min(min_y, y)
@@ -347,14 +351,14 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.25
-            if group in {1, 18}:
-                y += 0.35
-            if group not in {1, 18}:
-                y -= self._y_spacing
-                if 3 <= group <= 10:
-                    y -= self._y_spacing * 2
+            periods = [
+                element.period
+                for element in ELEMENTS
+                if element.group == group and not self._is_block_placeholder(element)
+            ]
+            top_period = min(periods) if periods else 1
+            x, y, _ = self._grid_to_world(group, top_period)
+            y += self._cube_size / 2 - 0.25 + self._y_spacing * 0.5
             screen = self._project_point(x, y, 0.0)
             if screen:
                 painter.drawText(screen[0] - 22, screen[1] - 19, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
@@ -380,18 +384,37 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             y_shell = y_num
             numbers_screen = self._project_point(x_num, y_num, 0.0)
             shells_screen = self._project_point(x_shell, y_shell, 0.0)
-            if numbers_screen:
-                self._draw_vertical_stack(painter, numbers_screen, numbers)
-            if shells_screen:
-                self._draw_vertical_stack(painter, shells_screen, shells)
+            top_screen = self._project_point(x_num, y_num + self._y_spacing / 2, 0.0)
+            bottom_screen = self._project_point(x_num, y_num - self._y_spacing / 2, 0.0)
+            if numbers_screen and top_screen and bottom_screen:
+                self._draw_vertical_stack(painter, numbers_screen[0], top_screen[1], bottom_screen[1], numbers)
+            if shells_screen and top_screen and bottom_screen:
+                self._draw_vertical_stack(painter, shells_screen[0], top_screen[1], bottom_screen[1], shells)
 
-    def _draw_vertical_stack(self, painter: QtGui.QPainter, pos: Tuple[int, int], items: List[str]) -> None:
-        line_height = 14
-        x, y = pos
-        total_height = line_height * len(items)
-        start_y = y - total_height + line_height
+    def _draw_vertical_stack(
+        self,
+        painter: QtGui.QPainter,
+        x: int,
+        top: int,
+        bottom: int,
+        items: List[str],
+    ) -> None:
+        if not items:
+            return
+        bottom_y = max(top, bottom)
+        font_metrics = painter.fontMetrics()
+        line_height = font_metrics.height()
+        spacing = max(0, font_metrics.leading())
+        total_height = len(items) * line_height + (len(items) - 1) * spacing
+        start_y = bottom_y - total_height
         for idx, item in enumerate(items):
-            painter.drawText(x - 10, start_y + idx * line_height, 20, line_height, QtCore.Qt.AlignCenter, item)
+            rect = QtCore.QRectF(
+                x - 10,
+                start_y + idx * (line_height + spacing),
+                20,
+                line_height,
+            )
+            painter.drawText(rect, QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter, item)
 
     def _draw_element_text(self, painter: QtGui.QPainter, element: Element) -> None:
         position = self._element_position(element)
