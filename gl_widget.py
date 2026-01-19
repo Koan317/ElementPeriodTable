@@ -42,15 +42,7 @@ from OpenGL.GL import (
 )
 from OpenGL.GLU import gluLookAt, gluProject, gluUnProject
 
-from element_data import (
-    ELEMENTS,
-    GROUP_LABELS,
-    PERIOD_NOBLE_GAS_SHELLS,
-    RADIOACTIVE,
-    Element,
-    group_color,
-    is_metal,
-)
+from element_data import ELEMENTS, GROUP_LABELS, PERIOD_NOBLE_GAS_SHELLS, RADIOACTIVE, Element, group_color, is_metal
 
 
 class PeriodicTableGLWidget(QOpenGLWidget):
@@ -69,7 +61,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._y_spacing = 1.55
         self._right_header_offset = 2.5
         self._left_header_offset = 2.0
-        self._split_offset = 0.0
         self._font_family = "Noto Sans Mono CJK SC"
         self._margin_cells = 1.5
         self._camera_radius = 38.0
@@ -422,8 +413,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
     def _grid_to_world(self, group: int, period: int) -> Tuple[float, float, float]:
         x = (group - 1) * self._x_spacing
         y = -(period - 1) * self._y_spacing
-        if group >= 13:
-            x += self._split_offset
         if period == 0:
             y += 0.7
         if group == 0:
@@ -435,8 +424,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
     def _element_position(self, element: Element) -> Tuple[float, float, float]:
         group = element.group
         period = element.period
-        x, y, z = self._grid_to_world(group, period)
-        return x, y, z
+        return self._grid_to_world(group, period)
 
     def _project_point(self, x: float, y: float, z: float) -> Optional[Tuple[int, int]]:
         if self._modelview is None or self._projection is None or self._viewport is None:
