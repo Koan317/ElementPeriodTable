@@ -21,6 +21,7 @@ from OpenGL.GL import (
     GL_PROJECTION,
     GL_PROJECTION_MATRIX,
     GL_QUADS,
+    GL_BLEND,
     GL_SMOOTH,
     GL_SHININESS,
     GL_SPECULAR,
@@ -29,6 +30,7 @@ from OpenGL.GL import (
     glClear,
     glClearColor,
     glDisable,
+    glDepthMask,
     glEnable,
     glEnd,
     glGetDoublev,
@@ -49,10 +51,14 @@ from OpenGL.GL import (
     glVertex3f,
 )
 from OpenGL.GLU import (
+    GLU_FILL,
+    GLU_OUTSIDE,
     GLU_SMOOTH,
     gluCylinder,
     gluLookAt,
     gluNewQuadric,
+    gluQuadricDrawStyle,
+    gluQuadricOrientation,
     gluProject,
     gluQuadricNormals,
     gluSphere,
@@ -109,7 +115,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_NORMALIZE)
         glShadeModel(GL_SMOOTH)
         self._quadric = gluNewQuadric()
+        gluQuadricDrawStyle(self._quadric, GLU_FILL)
+        gluQuadricOrientation(self._quadric, GLU_OUTSIDE)
         gluQuadricNormals(self._quadric, GLU_SMOOTH)
+        glDisable(GL_BLEND)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
         glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
         glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
@@ -126,6 +135,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def paintGL(self) -> None:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glEnable(GL_DEPTH_TEST)
+        glDepthMask(True)
+        glDisable(GL_BLEND)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         camera_x, camera_z = self._camera_position()
@@ -226,75 +238,76 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             self._draw_cube(size)
             return
         half = size / 2
-        half_inner = inner / 2
+        face_extent = half - radius
+        inner = face_extent * 2
 
         glBegin(GL_QUADS)
         glNormal3f(0.0, 0.0, 1.0)
-        glVertex3f(-half_inner, -half_inner, half)
-        glVertex3f(half_inner, -half_inner, half)
-        glVertex3f(half_inner, half_inner, half)
-        glVertex3f(-half_inner, half_inner, half)
+        glVertex3f(-face_extent, -face_extent, half)
+        glVertex3f(face_extent, -face_extent, half)
+        glVertex3f(face_extent, face_extent, half)
+        glVertex3f(-face_extent, face_extent, half)
 
         glNormal3f(0.0, 0.0, -1.0)
-        glVertex3f(-half_inner, -half_inner, -half)
-        glVertex3f(-half_inner, half_inner, -half)
-        glVertex3f(half_inner, half_inner, -half)
-        glVertex3f(half_inner, -half_inner, -half)
+        glVertex3f(-face_extent, -face_extent, -half)
+        glVertex3f(-face_extent, face_extent, -half)
+        glVertex3f(face_extent, face_extent, -half)
+        glVertex3f(face_extent, -face_extent, -half)
 
         glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-half_inner, half, -half_inner)
-        glVertex3f(-half_inner, half, half_inner)
-        glVertex3f(half_inner, half, half_inner)
-        glVertex3f(half_inner, half, -half_inner)
+        glVertex3f(-face_extent, half, -face_extent)
+        glVertex3f(-face_extent, half, face_extent)
+        glVertex3f(face_extent, half, face_extent)
+        glVertex3f(face_extent, half, -face_extent)
 
         glNormal3f(0.0, -1.0, 0.0)
-        glVertex3f(-half_inner, -half, -half_inner)
-        glVertex3f(half_inner, -half, -half_inner)
-        glVertex3f(half_inner, -half, half_inner)
-        glVertex3f(-half_inner, -half, half_inner)
+        glVertex3f(-face_extent, -half, -face_extent)
+        glVertex3f(face_extent, -half, -face_extent)
+        glVertex3f(face_extent, -half, face_extent)
+        glVertex3f(-face_extent, -half, face_extent)
 
         glNormal3f(1.0, 0.0, 0.0)
-        glVertex3f(half, -half_inner, -half_inner)
-        glVertex3f(half, half_inner, -half_inner)
-        glVertex3f(half, half_inner, half_inner)
-        glVertex3f(half, -half_inner, half_inner)
+        glVertex3f(half, -face_extent, -face_extent)
+        glVertex3f(half, face_extent, -face_extent)
+        glVertex3f(half, face_extent, face_extent)
+        glVertex3f(half, -face_extent, face_extent)
 
         glNormal3f(-1.0, 0.0, 0.0)
-        glVertex3f(-half, -half_inner, -half_inner)
-        glVertex3f(-half, -half_inner, half_inner)
-        glVertex3f(-half, half_inner, half_inner)
-        glVertex3f(-half, half_inner, -half_inner)
+        glVertex3f(-half, -face_extent, -face_extent)
+        glVertex3f(-half, -face_extent, face_extent)
+        glVertex3f(-half, face_extent, face_extent)
+        glVertex3f(-half, face_extent, -face_extent)
         glEnd()
 
         if self._quadric is None:
             return
 
-        for y in (-half_inner, half_inner):
-            for z in (-half_inner, half_inner):
+        for y in (-face_extent, face_extent):
+            for z in (-face_extent, face_extent):
                 glPushMatrix()
-                glTranslatef(-half_inner, y, z)
+                glTranslatef(-face_extent, y, z)
                 glRotatef(90, 0, 1, 0)
                 gluCylinder(self._quadric, radius, radius, inner, segments, 1)
                 glPopMatrix()
 
-        for x in (-half_inner, half_inner):
-            for z in (-half_inner, half_inner):
+        for x in (-face_extent, face_extent):
+            for z in (-face_extent, face_extent):
                 glPushMatrix()
-                glTranslatef(x, -half_inner, z)
+                glTranslatef(x, -face_extent, z)
                 glRotatef(-90, 1, 0, 0)
                 gluCylinder(self._quadric, radius, radius, inner, segments, 1)
                 glPopMatrix()
 
-        for x in (-half_inner, half_inner):
-            for y in (-half_inner, half_inner):
+        for x in (-face_extent, face_extent):
+            for y in (-face_extent, face_extent):
                 glPushMatrix()
-                glTranslatef(x, y, -half_inner)
+                glTranslatef(x, y, -face_extent)
                 gluCylinder(self._quadric, radius, radius, inner, segments, 1)
                 glPopMatrix()
 
-        for x in (-half_inner, half_inner):
-            for y in (-half_inner, half_inner):
-                for z in (-half_inner, half_inner):
+        for x in (-face_extent, face_extent):
+            for y in (-face_extent, face_extent):
+                for z in (-face_extent, face_extent):
                     glPushMatrix()
                     glTranslatef(x, y, z)
                     gluSphere(self._quadric, radius, segments, segments)
