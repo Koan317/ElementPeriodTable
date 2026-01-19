@@ -85,6 +85,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
         glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
         glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
+        glLightfv(GL_LIGHT0, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
         glLightModelfv(GL_LIGHT_MODEL_AMBIENT, [0.2, 0.2, 0.2, 1.0])
 
     def resizeGL(self, w: int, h: int) -> None:
@@ -122,16 +123,16 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            specular = [0.9, 0.9, 0.9, 1.0]
-            shininess = [64.0]
+            specular = [0.95, 0.95, 0.95, 1.0]
+            shininess = [96.0]
             if self._has_metal_radical(element.name_cn):
                 specular = [1.0, 1.0, 1.0, 1.0]
-                shininess = [96.0]
+                shininess = [120.0]
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.2, 0.2, 0.2, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [8.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.12, 0.12, 0.12, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [6.0])
 
     def _draw_cube(self, size: float) -> None:
         half = size / 2

@@ -90,28 +90,31 @@ PERIOD_NOBLE_GAS_SHELLS = {
     ),
 }
 
-METALLOID_LINE = {"B", "Si", "Ge", "As", "Sb", "Te", "Po", "At"}
 NON_METALS = {
     "H",
     "He",
+    "B",
     "C",
     "N",
     "O",
     "F",
     "Ne",
+    "Si",
     "P",
     "S",
     "Cl",
     "Ar",
+    "As",
     "Se",
     "Br",
     "Kr",
+    "Te",
     "I",
     "Xe",
-    "Rn",
-    "Og",
     "At",
+    "Rn",
     "Ts",
+    "Og",
 }
 
 RADIOACTIVE = {43, 61} | set(range(84, 119))
@@ -447,11 +450,7 @@ def build_elements() -> List[Element]:
 
 
 def is_metal(symbol: str) -> bool:
-    if symbol in NON_METALS:
-        return False
-    if symbol in METALLOID_LINE:
-        return False
-    return True
+    return symbol not in NON_METALS
 
 
 F_BLOCK_LANTH_COLOR = (96, 200, 191)
