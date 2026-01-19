@@ -349,15 +349,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         for group in range(1, 19):
             x, y, _ = self._grid_to_world(group, 1)
             y += self._cube_size / 2 - 0.25
-            if group in {1, 18}:
-                y += 0.35
-            if group not in {1, 18}:
-                y -= self._y_spacing
-                if 3 <= group <= 12:
-                    y -= self._y_spacing * 2
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 22, screen[1] - 24, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 22, screen[1] - 58, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
