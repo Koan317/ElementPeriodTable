@@ -403,11 +403,15 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             return
         top_y = min(top, bottom)
         bottom_y = max(top, bottom)
-        line_height = (bottom_y - top_y) / len(items)
+        font_metrics = painter.fontMetrics()
+        line_height = font_metrics.height()
+        spacing = max(0, font_metrics.leading())
+        total_height = len(items) * line_height + (len(items) - 1) * spacing
+        start_y = bottom_y - total_height
         for idx, item in enumerate(items):
             rect = QtCore.QRectF(
                 x - 10,
-                top_y + idx * line_height,
+                start_y + idx * (line_height + spacing),
                 20,
                 line_height,
             )
