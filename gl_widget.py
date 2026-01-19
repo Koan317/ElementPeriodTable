@@ -411,7 +411,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
                 20,
                 line_height,
             )
-            painter.drawText(rect, QtCore.Qt.AlignCenter, item)
+            painter.drawText(rect, QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter, item)
 
     def _draw_element_text(self, painter: QtGui.QPainter, element: Element) -> None:
         position = self._element_position(element)
