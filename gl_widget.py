@@ -361,7 +361,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             y += self._cube_size / 2 - 0.25 + self._y_spacing * 0.5
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 22, screen[1] - 19, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
