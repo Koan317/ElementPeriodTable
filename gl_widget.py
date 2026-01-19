@@ -16,10 +16,12 @@ from OpenGL.GL import (
     GL_LIGHTING,
     GL_MODELVIEW,
     GL_MODELVIEW_MATRIX,
+    GL_NORMALIZE,
     GL_POSITION,
     GL_PROJECTION,
     GL_PROJECTION_MATRIX,
     GL_QUADS,
+    GL_SMOOTH,
     GL_SHININESS,
     GL_SPECULAR,
     GL_VIEWPORT,
@@ -41,11 +43,21 @@ from OpenGL.GL import (
     glPopMatrix,
     glPushMatrix,
     glRotatef,
+    glShadeModel,
     glTranslatef,
     glViewport,
     glVertex3f,
 )
-from OpenGL.GLU import gluCylinder, gluLookAt, gluNewQuadric, gluProject, gluSphere, gluUnProject
+from OpenGL.GLU import (
+    GLU_SMOOTH,
+    gluCylinder,
+    gluLookAt,
+    gluNewQuadric,
+    gluProject,
+    gluQuadricNormals,
+    gluSphere,
+    gluUnProject,
+)
 
 from element_data import (
     ELEMENTS,
@@ -94,7 +106,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
+        glEnable(GL_NORMALIZE)
+        glShadeModel(GL_SMOOTH)
         self._quadric = gluNewQuadric()
+        gluQuadricNormals(self._quadric, GLU_SMOOTH)
         glLightfv(GL_LIGHT0, GL_POSITION, [0.0, 0.0, 80.0, 1.0])
         glLightfv(GL_LIGHT0, GL_AMBIENT, [0.4, 0.4, 0.4, 1.0])
         glLightfv(GL_LIGHT0, GL_DIFFUSE, [1.12, 1.12, 1.12, 1.0])
@@ -198,11 +213,11 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         if not top_left or not bottom_right:
             return self._cube_size * 0.08
         pixel_width = max(1.0, abs(bottom_right[0] - top_left[0]))
-        radius = (10.0 / pixel_width) * self._cube_size
+        radius = (7.0 / pixel_width) * self._cube_size
         max_radius = self._cube_size / 2 - 0.02
         return max(0.02, min(radius, max_radius))
 
-    def _draw_rounded_cube(self, size: float, radius: float, segments: int = 12) -> None:
+    def _draw_rounded_cube(self, size: float, radius: float, segments: int = 24) -> None:
         if radius <= 0:
             self._draw_cube(size)
             return
