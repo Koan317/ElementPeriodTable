@@ -216,7 +216,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             max_y = max(max_y, y)
         for group in range(1, 19):
             x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.15
+            y += self._cube_size / 2 - 0.25
+            if group in {1, 18}:
+                y += 0.35
             min_x = min(min_x, x)
             max_x = max(max_x, x)
             min_y = min(min_y, y)
@@ -346,7 +348,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
             x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.15
+            y += self._cube_size / 2 - 0.25
+            if group in {1, 18}:
+                y += 0.35
             screen = self._project_point(x, y, 0.0)
             if screen:
                 painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
@@ -425,7 +429,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         painter.setFont(font_small)
         painter.setPen(QtGui.QColor(240, 240, 240))
-        top_line_height = max(font_small.pointSizeF() + 8, font_symbol.pointSizeF() + 10)
+        top_line_height = max(font_small.pointSizeF() + 8, font_symbol.pointSizeF() + 14)
         top_line = QtCore.QRectF(inner_rect.left(), inner_rect.top(), inner_rect.width(), top_line_height)
         painter.drawText(top_line, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, number)
 
@@ -444,7 +448,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(name_line, QtCore.Qt.AlignCenter, element.name_cn)
 
         painter.setFont(font_small)
-        tail_line_height = font_small.pointSizeF() + 8
+        tail_line_height = font_small.pointSizeF() + 10
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
         painter.drawText(line3, QtCore.Qt.AlignCenter, "待补充")
