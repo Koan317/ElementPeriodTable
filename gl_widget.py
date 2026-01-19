@@ -66,6 +66,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         self._right_header_offset = 1.6
         self._left_header_offset = 1.2
         self._font_family = "Noto Sans Mono CJK SC"
+        self._symbol_font_family = "Noto Sans CJK SC"
         self._group_font_family = "Noto Sans CJK SC"
         self._margin_cells = 1.0
         self._camera_radius = 38.0
@@ -321,15 +322,15 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
     def _draw_group_headers(self, painter: QtGui.QPainter) -> None:
         labels = GROUP_LABELS[self.group_mode]
-        font = QtGui.QFont(self._group_font_family, 8, QtGui.QFont.Bold)
+        font = QtGui.QFont(self._group_font_family, 9, QtGui.QFont.Bold)
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 1)
-            y += self._cube_size / 2 - 0.05
+            x, y, _ = self._grid_to_world(group, 0)
+            y += 0.15
             screen = self._project_point(x, y, 0.0)
             if screen:
-                painter.drawText(screen[0] - 20, screen[1] - 14, 40, 16, QtCore.Qt.AlignCenter, labels[group - 1])
+                painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
 
     def _draw_period_headers(self, painter: QtGui.QPainter) -> None:
         font = QtGui.QFont(self._font_family, 11, QtGui.QFont.Bold)
@@ -384,7 +385,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
 
         font_small = QtGui.QFont(self._font_family, 9)
-        font_symbol = QtGui.QFont(self._font_family, 14, QtGui.QFont.Bold)
+        font_symbol = QtGui.QFont(self._symbol_font_family, 14, QtGui.QFont.Bold)
         font_name = QtGui.QFont(self._font_family, 10)
 
         padding = 4.0
