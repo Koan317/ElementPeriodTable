@@ -109,7 +109,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         for element in ELEMENTS:
             position = self._element_position(element)
-            z_offset = 0.3 if element.symbol == self.hovered_symbol else 0.0
+            z_offset = 0.3 if element.symbol == self.hovered_symbol and not self._is_block_placeholder(element) else 0.0
             glPushMatrix()
             glTranslatef(position[0], position[1], position[2] + z_offset)
             self._apply_material(element)
@@ -381,6 +381,15 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             max(1.0, abs(bottom_right[0] - top_left[0])),
             max(1.0, abs(bottom_right[1] - top_left[1])),
         )
+        if self._is_block_placeholder(element):
+            font = QtGui.QFont(self._group_font_family, 12, QtGui.QFont.Bold)
+            painter.setFont(font)
+            painter.setPen(QtGui.QColor(245, 245, 245))
+            label = "镧系" if element.symbol == "La" else "锕系"
+            painter.drawText(rect, QtCore.Qt.AlignCenter, label)
+            painter.restore()
+            return
+
         number = str(element.number)
         symbol_color = QtGui.QColor(220, 80, 80) if element.number in RADIOACTIVE else QtGui.QColor(245, 245, 245)
 
@@ -543,6 +552,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             y -= self._y_spacing * 0.5
         return x, y, z
 
+    @staticmethod
+    def _is_block_placeholder(element: Element) -> bool:
+        return element.symbol in {"La", "Ac"} and element.period in {6, 7}
+
     def _project_point(self, x: float, y: float, z: float) -> Optional[Tuple[int, int]]:
         if self._modelview is None or self._projection is None or self._viewport is None:
             return None
@@ -587,5 +600,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         for element in ELEMENTS:
             pos_x, pos_y, _ = self._element_position(element)
             if abs(hit_x - pos_x) <= self._cube_size / 2 and abs(hit_y - pos_y) <= self._cube_size / 2:
+                if self._is_block_placeholder(element):
+                    return None
                 return element.symbol
         return None
