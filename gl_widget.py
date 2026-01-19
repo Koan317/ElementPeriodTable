@@ -214,6 +214,25 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             max_x = max(max_x, x)
             min_y = min(min_y, y)
             max_y = max(max_y, y)
+        for group in range(1, 19):
+            x, y, _ = self._grid_to_world(group, 1)
+            y += self._cube_size / 2 - 0.15
+            min_x = min(min_x, x)
+            max_x = max(max_x, x)
+            min_y = min(min_y, y)
+            max_y = max(max_y, y)
+        for period in range(1, 8):
+            x, y, _ = self._grid_to_world(0, period)
+            min_x = min(min_x, x)
+            max_x = max(max_x, x)
+            min_y = min(min_y, y)
+            max_y = max(max_y, y)
+            x_num, y_num, _ = self._grid_to_world(19, period)
+            x_shell = x_num + self._x_spacing * 0.7
+            min_x = min(min_x, x_num, x_shell)
+            max_x = max(max_x, x_num, x_shell)
+            min_y = min(min_y, y_num)
+            max_y = max(max_y, y_num)
         half = self._cube_size / 2
         return min_x - half, max_x + half, min_y - half, max_y + half
 
@@ -326,8 +345,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.setFont(font)
         painter.setPen(QtGui.QColor(235, 235, 235))
         for group in range(1, 19):
-            x, y, _ = self._grid_to_world(group, 0)
-            y += 0.0
+            x, y, _ = self._grid_to_world(group, 1)
+            y += self._cube_size / 2 - 0.15
             screen = self._project_point(x, y, 0.0)
             if screen:
                 painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
@@ -349,7 +368,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         for period in range(1, 8):
             numbers, shells = PERIOD_NOBLE_GAS_SHELLS[period]
             x_num, y_num, _ = self._grid_to_world(19, period)
-            x_shell, y_shell, _ = self._grid_to_world(20, period)
+            x_shell = x_num + self._x_spacing * 0.7
+            y_shell = y_num
             numbers_screen = self._project_point(x_num, y_num, 0.0)
             shells_screen = self._project_point(x_shell, y_shell, 0.0)
             if numbers_screen:
@@ -363,7 +383,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         total_height = line_height * len(items)
         start_y = y - total_height + line_height
         for idx, item in enumerate(items):
-            painter.drawText(x - 8, start_y + idx * line_height, 16, line_height, QtCore.Qt.AlignCenter, item)
+            painter.drawText(x - 10, start_y + idx * line_height, 20, line_height, QtCore.Qt.AlignCenter, item)
 
     def _draw_element_text(self, painter: QtGui.QPainter, element: Element) -> None:
         position = self._element_position(element)
