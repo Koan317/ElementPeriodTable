@@ -222,7 +222,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             ]
             top_period = min(periods) if periods else 1
             x, y, _ = self._grid_to_world(group, top_period)
-            y += self._cube_size / 2 - 0.25 + self._y_spacing
+            y += self._cube_size / 2 - 0.25 + self._y_spacing * 0.5
             min_x = min(min_x, x)
             max_x = max(max_x, x)
             min_y = min(min_y, y)
@@ -358,7 +358,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             ]
             top_period = min(periods) if periods else 1
             x, y, _ = self._grid_to_world(group, top_period)
-            y += self._cube_size / 2 - 0.25 + self._y_spacing
+            y += self._cube_size / 2 - 0.25 + self._y_spacing * 0.5
             screen = self._project_point(x, y, 0.0)
             if screen:
                 painter.drawText(screen[0] - 22, screen[1] - 14, 44, 16, QtCore.Qt.AlignCenter, labels[group - 1])
