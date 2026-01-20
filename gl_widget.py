@@ -164,16 +164,16 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            specular = [0.95, 0.95, 0.95, 1.0]
-            shininess = [96.0]
+            specular = [1.0, 1.0, 1.0, 1.0]
+            shininess = [120.0]
             if self._has_metal_radical(element.name_cn):
                 specular = [1.0, 1.0, 1.0, 1.0]
-                shininess = [120.0]
+                shininess = [128.0]
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.12, 0.12, 0.12, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [6.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.05, 0.05, 0.05, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [2.0])
 
     def _draw_cube(self, size: float) -> None:
         half = size / 2
@@ -216,18 +216,9 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glEnd()
 
     def _corner_radius_world(self, position: Tuple[float, float, float]) -> float:
-        if self._modelview is None or self._projection is None or self._viewport is None:
-            return self._cube_size * 0.08
-        half = self._cube_size / 2
-        front_z = position[2] + half
-        top_left = self._project_point(position[0] - half, position[1] + half, front_z)
-        bottom_right = self._project_point(position[0] + half, position[1] - half, front_z)
-        if not top_left or not bottom_right:
-            return self._cube_size * 0.08
-        pixel_width = max(1.0, abs(bottom_right[0] - top_left[0]))
-        radius = (7.0 / pixel_width) * self._cube_size
-        max_radius = self._cube_size / 2 - 0.02
-        return max(0.02, min(radius, max_radius))
+        max_radius = self._cube_size / 2
+        radius = self._cube_size * 0.12
+        return min(radius, max_radius)
 
     def _draw_rounded_cube(self, size: float, radius: float, segments: int = 24) -> None:
         if radius <= 0:
@@ -587,8 +578,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         font_small = QtGui.QFont(self._font_family, 11)
         font_symbol = QtGui.QFont(self._symbol_font_family, 14, QtGui.QFont.Bold)
         font_name = QtGui.QFont(self._font_family, 12)
-        font_valence = QtGui.QFont(self._font_family, 10)
-        font_valence.setStretch(QtGui.QFont.Condensed)
+        font_valence = QtGui.QFont("Noto Sans Mono CJK SC", 10)
+        font_valence.setStretch(90)
 
         padding = 2.0
         inner_rect = rect.adjusted(padding, padding, -padding, -padding)
@@ -622,6 +613,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         line3 = QtCore.QRectF(inner_rect.left(), name_line.bottom(), inner_rect.width(), tail_line_height)
         line4 = QtCore.QRectF(inner_rect.left(), line3.bottom(), inner_rect.width(), tail_line_height)
         painter.drawText(line3, QtCore.Qt.AlignCenter, atomic_weight(element.symbol))
+        painter.setFont(font_valence)
         painter.drawText(line4, QtCore.Qt.AlignCenter, valence_electron_config(element.symbol))
 
         painter.restore()
