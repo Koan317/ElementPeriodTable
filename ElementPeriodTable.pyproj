@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="ElementPeriodTable.py" />
     <Compile Include="element_data.py" />
+    <Compile Include="element_wikipedia_data.py" />
     <Compile Include="gl_widget.py" />
     <Compile Include="main_window.py" />
   </ItemGroup>
