@@ -71,7 +71,7 @@ class ElementDetailPage(QtWidgets.QWidget):
             form = QtWidgets.QFormLayout()
             form.setLabelAlignment(QtCore.Qt.AlignLeft)
             form.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-            form.setHorizontalSpacing(32)
+            form.setHorizontalSpacing(64)
             form.setVerticalSpacing(16)
             for key in PROPERTY_ORDER:
                 if key not in allotrope.properties:
