@@ -164,16 +164,16 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            specular = [1.0, 1.0, 1.0, 1.0]
-            shininess = [120.0]
+            specular = [0.95, 0.95, 0.95, 1.0]
+            shininess = [128.0]
             if self._has_metal_radical(element.name_cn):
-                specular = [1.0, 1.0, 1.0, 1.0]
+                specular = [0.95, 0.95, 0.95, 1.0]
                 shininess = [128.0]
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.05, 0.05, 0.05, 1.0])
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [2.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.0, 0.0, 0.0, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [0.0])
 
     def _draw_cube(self, size: float) -> None:
         half = size / 2
@@ -234,40 +234,40 @@ class PeriodicTableGLWidget(QOpenGLWidget):
 
         glBegin(GL_QUADS)
         glNormal3f(0.0, 0.0, 1.0)
-        glVertex3f(-face_extent, -face_extent, face_extent)
-        glVertex3f(face_extent, -face_extent, face_extent)
-        glVertex3f(face_extent, face_extent, face_extent)
-        glVertex3f(-face_extent, face_extent, face_extent)
+        glVertex3f(-face_extent, -face_extent, half)
+        glVertex3f(face_extent, -face_extent, half)
+        glVertex3f(face_extent, face_extent, half)
+        glVertex3f(-face_extent, face_extent, half)
 
         glNormal3f(0.0, 0.0, -1.0)
-        glVertex3f(-face_extent, -face_extent, -face_extent)
-        glVertex3f(-face_extent, face_extent, -face_extent)
-        glVertex3f(face_extent, face_extent, -face_extent)
-        glVertex3f(face_extent, -face_extent, -face_extent)
+        glVertex3f(-face_extent, -face_extent, -half)
+        glVertex3f(-face_extent, face_extent, -half)
+        glVertex3f(face_extent, face_extent, -half)
+        glVertex3f(face_extent, -face_extent, -half)
 
         glNormal3f(0.0, 1.0, 0.0)
-        glVertex3f(-face_extent, face_extent, -face_extent)
-        glVertex3f(-face_extent, face_extent, face_extent)
-        glVertex3f(face_extent, face_extent, face_extent)
-        glVertex3f(face_extent, face_extent, -face_extent)
+        glVertex3f(-face_extent, half, -face_extent)
+        glVertex3f(-face_extent, half, face_extent)
+        glVertex3f(face_extent, half, face_extent)
+        glVertex3f(face_extent, half, -face_extent)
 
         glNormal3f(0.0, -1.0, 0.0)
-        glVertex3f(-face_extent, -face_extent, -face_extent)
-        glVertex3f(face_extent, -face_extent, -face_extent)
-        glVertex3f(face_extent, -face_extent, face_extent)
-        glVertex3f(-face_extent, -face_extent, face_extent)
+        glVertex3f(-face_extent, -half, -face_extent)
+        glVertex3f(face_extent, -half, -face_extent)
+        glVertex3f(face_extent, -half, face_extent)
+        glVertex3f(-face_extent, -half, face_extent)
 
         glNormal3f(1.0, 0.0, 0.0)
-        glVertex3f(face_extent, -face_extent, -face_extent)
-        glVertex3f(face_extent, face_extent, -face_extent)
-        glVertex3f(face_extent, face_extent, face_extent)
-        glVertex3f(face_extent, -face_extent, face_extent)
+        glVertex3f(half, -face_extent, -face_extent)
+        glVertex3f(half, face_extent, -face_extent)
+        glVertex3f(half, face_extent, face_extent)
+        glVertex3f(half, -face_extent, face_extent)
 
         glNormal3f(-1.0, 0.0, 0.0)
-        glVertex3f(-face_extent, -face_extent, -face_extent)
-        glVertex3f(-face_extent, -face_extent, face_extent)
-        glVertex3f(-face_extent, face_extent, face_extent)
-        glVertex3f(-face_extent, face_extent, -face_extent)
+        glVertex3f(-half, -face_extent, -face_extent)
+        glVertex3f(-half, -face_extent, face_extent)
+        glVertex3f(-half, face_extent, face_extent)
+        glVertex3f(-half, face_extent, -face_extent)
         glEnd()
 
         if self._quadric is None:
