@@ -165,10 +165,10 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
             specular = [1.0, 1.0, 1.0, 1.0]
-            shininess = [128.0]
+            shininess = [120.0]
             if self._has_metal_radical(element.name_cn):
                 specular = [1.0, 1.0, 1.0, 1.0]
-                shininess = [140.0]
+                shininess = [128.0]
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
         else:
