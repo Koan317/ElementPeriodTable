@@ -71,10 +71,8 @@ class ElementDetailPage(QtWidgets.QWidget):
             form = QtWidgets.QFormLayout()
             form.setLabelAlignment(QtCore.Qt.AlignLeft)
             form.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-            form.setHorizontalSpacing(40)
-            form.setVerticalSpacing(28)
-            form.setRowWrapPolicy(QtWidgets.QFormLayout.WrapAllRows)
-            form.setFieldGrowthPolicy(QtWidgets.QFormLayout.ExpandingFieldsGrow)
+            form.setHorizontalSpacing(32)
+            form.setVerticalSpacing(16)
             for key in PROPERTY_ORDER:
                 if key not in allotrope.properties:
                     continue
@@ -82,11 +80,6 @@ class ElementDetailPage(QtWidgets.QWidget):
                 label = QtWidgets.QLabel(PROPERTY_LABELS.get(key, key))
                 label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
                 label.setWordWrap(True)
-                label.setMinimumWidth(280)
-                label.setSizePolicy(
-                    QtWidgets.QSizePolicy.Fixed,
-                    QtWidgets.QSizePolicy.Preferred,
-                )
                 value_label = QtWidgets.QLabel(value)
                 value_label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
                 value_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
