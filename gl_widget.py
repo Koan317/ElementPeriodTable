@@ -603,7 +603,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             inner_rect.left(),
             top_line.bottom(),
             inner_rect.width(),
-            font_name.pointSizeF() + 8,
+            font_name.pointSizeF() + 10,
         )
         painter.drawText(name_line, QtCore.Qt.AlignCenter, element.name_cn)
 
