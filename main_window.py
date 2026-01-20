@@ -39,7 +39,7 @@ class ElementDetailPage(QtWidgets.QWidget):
         self.content = QtWidgets.QWidget()
         self.content.setStyleSheet("background-color: #0C1218;")
         self.content_layout = QtWidgets.QVBoxLayout(self.content)
-        self.content_layout.setSpacing(12)
+        self.content_layout.setSpacing(24)
         self.content_layout.addStretch()
         self.scroll.setWidget(self.content)
         layout.addWidget(self.scroll)
@@ -61,24 +61,33 @@ class ElementDetailPage(QtWidgets.QWidget):
             group = QtWidgets.QGroupBox(allotrope.name)
             group.setStyleSheet(
                 "QGroupBox { color: #F5F7FA; font-size: 42px; font-weight: bold; border: 1px solid #2A3948;"
-                " border-radius: 6px; margin-top: 10px; background-color: #141D26; }"
+                " border-radius: 6px; margin-top: 14px; background-color: #141D26; }"
                 "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }"
             )
             box_layout = QtWidgets.QVBoxLayout(group)
+            box_layout.setContentsMargins(18, 20, 18, 20)
+            box_layout.setSpacing(18)
 
             form = QtWidgets.QFormLayout()
             form.setLabelAlignment(QtCore.Qt.AlignLeft)
             form.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-            form.setHorizontalSpacing(24)
+            form.setHorizontalSpacing(32)
+            form.setVerticalSpacing(16)
             for key in PROPERTY_ORDER:
                 if key not in allotrope.properties:
                     continue
                 value = allotrope.properties[key]
                 label = QtWidgets.QLabel(PROPERTY_LABELS.get(key, key))
                 label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
+                label.setWordWrap(True)
                 value_label = QtWidgets.QLabel(value)
                 value_label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
                 value_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
+                value_label.setWordWrap(True)
+                value_label.setSizePolicy(
+                    QtWidgets.QSizePolicy.Expanding,
+                    QtWidgets.QSizePolicy.Preferred,
+                )
                 form.addRow(label, value_label)
             if form.rowCount() == 0:
                 empty = QtWidgets.QLabel("暂无可展示的属性数据。")

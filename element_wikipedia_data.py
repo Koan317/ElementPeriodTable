@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Dict, List
 
+from element_data import ELEMENTS
+
 
 @dataclass(frozen=True)
 class AllotropeData:
@@ -111,6 +113,11 @@ WIKIPEDIA_ALLOTROPES: Dict[str, List[AllotropeData]] = {
     ],
 }
 
+DEFAULT_ALLOTROPES: Dict[str, List[AllotropeData]] = {
+    element.symbol: [AllotropeData(name=f"{element.name_cn} 单质", properties={})]
+    for element in ELEMENTS
+}
+
 
 def get_allotropes(symbol: str) -> List[AllotropeData]:
-    return WIKIPEDIA_ALLOTROPES.get(symbol, [])
+    return WIKIPEDIA_ALLOTROPES.get(symbol, DEFAULT_ALLOTROPES.get(symbol, []))
