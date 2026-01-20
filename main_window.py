@@ -65,13 +65,13 @@ class ElementDetailPage(QtWidgets.QWidget):
                 "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }"
             )
             box_layout = QtWidgets.QVBoxLayout(group)
-            box_layout.setContentsMargins(18, 20, 18, 20)
+            box_layout.setContentsMargins(18, 40, 18, 20)
             box_layout.setSpacing(18)
 
             form = QtWidgets.QFormLayout()
             form.setLabelAlignment(QtCore.Qt.AlignLeft)
             form.setFormAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-            form.setHorizontalSpacing(64)
+            form.setHorizontalSpacing(32)
             form.setVerticalSpacing(16)
             for key in PROPERTY_ORDER:
                 if key not in allotrope.properties:
