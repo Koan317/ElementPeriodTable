@@ -154,7 +154,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
             glPushMatrix()
             glTranslatef(position[0], position[1], position[2] + z_offset)
             self._apply_material(element)
-            corner_radius = self._corner_radius_world(position)
+            corner_radius = self._corner_radius()
             self._draw_rounded_cube(self._cube_size, corner_radius)
             glPopMatrix()
 
@@ -164,13 +164,8 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         color = element_color(element, self.group_mode)
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [*color, 1.0])
         if is_metal(element.symbol):
-            specular = [1.0, 1.0, 1.0, 1.0]
-            shininess = [128.0]
-            if self._has_metal_radical(element.name_cn):
-                specular = [1.0, 1.0, 1.0, 1.0]
-                shininess = [128.0]
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular)
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, shininess)
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [128.0])
         else:
             glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, [0.0, 0.0, 0.0, 1.0])
             glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, [0.0])
@@ -215,7 +210,7 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         glVertex3f(-half, half, -half)
         glEnd()
 
-    def _corner_radius_world(self, position: Tuple[float, float, float]) -> float:
+    def _corner_radius(self) -> float:
         max_radius = self._cube_size / 2
         radius = self._cube_size * 0.12
         return min(radius, max_radius)
@@ -617,107 +612,6 @@ class PeriodicTableGLWidget(QOpenGLWidget):
         painter.drawText(line4, QtCore.Qt.AlignCenter, valence_electron_config(element.symbol))
 
         painter.restore()
-
-    def _has_metal_radical(self, name: str) -> bool:
-        metal_radical_chars = {
-            "锂",
-            "铍",
-            "钠",
-            "镁",
-            "铝",
-            "钾",
-            "钙",
-            "钪",
-            "钛",
-            "钒",
-            "铬",
-            "锰",
-            "铁",
-            "钴",
-            "镍",
-            "铜",
-            "锌",
-            "镓",
-            "锗",
-            "铷",
-            "锶",
-            "钇",
-            "锆",
-            "铌",
-            "钼",
-            "锝",
-            "钌",
-            "铑",
-            "钯",
-            "银",
-            "镉",
-            "铟",
-            "锡",
-            "锑",
-            "铯",
-            "钡",
-            "镧",
-            "铈",
-            "镨",
-            "钕",
-            "钷",
-            "钐",
-            "铕",
-            "钆",
-            "铽",
-            "镝",
-            "钬",
-            "铒",
-            "铥",
-            "镱",
-            "镥",
-            "铪",
-            "钽",
-            "钨",
-            "铼",
-            "锇",
-            "铱",
-            "铂",
-            "金",
-            "汞",
-            "铊",
-            "铅",
-            "铋",
-            "钋",
-            "钫",
-            "镭",
-            "锕",
-            "钍",
-            "镤",
-            "铀",
-            "镎",
-            "钚",
-            "镅",
-            "锔",
-            "锫",
-            "锎",
-            "锿",
-            "镄",
-            "钔",
-            "锘",
-            "铹",
-            "𬬻",
-            "𬭊",
-            "𬭳",
-            "𬭛",
-            "𬭶",
-            "鿏",
-            "𫟼",
-            "𬬭",
-            "鿔",
-            "鿭",
-            "𫟷",
-            "镆",
-            "鉝",
-            "鿬",
-            "鿫",
-        }
-        return any(char in metal_radical_chars for char in name)
 
     def _grid_to_world(self, group: int, period: int) -> Tuple[float, float, float]:
         x = (group - 1) * self._x_spacing
