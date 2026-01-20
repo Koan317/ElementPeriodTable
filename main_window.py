@@ -21,12 +21,12 @@ class ElementDetailPage(QtWidgets.QWidget):
         self.back_button = QtWidgets.QToolButton()
         self.back_button.setText("返回")
         self.back_button.setStyleSheet(
-            "QToolButton { color: #F5F7FA; background-color: #1C2731; padding: 8px 14px; border-radius: 6px;"
-            " font-size: 12px; }"
+            "QToolButton { color: #F5F7FA; background-color: #1C2731; padding: 12px 20px; border-radius: 6px;"
+            " font-size: 36px; }"
             "QToolButton:hover { background-color: #2A3948; }"
         )
         self.title_label = QtWidgets.QLabel("元素详情")
-        self.title_label.setStyleSheet("color: #F5F7FA; font-size: 18px; font-weight: bold;")
+        self.title_label.setStyleSheet("color: #F5F7FA; font-size: 54px; font-weight: bold;")
         header.addWidget(self.back_button, alignment=QtCore.Qt.AlignLeft)
         header.addSpacing(8)
         header.addWidget(self.title_label)
@@ -52,7 +52,7 @@ class ElementDetailPage(QtWidgets.QWidget):
         allotropes = get_allotropes(element.symbol)
         if not allotropes:
             placeholder = QtWidgets.QLabel("暂无可用的维基百科数据。")
-            placeholder.setStyleSheet("color: #F5F7FA; font-size: 14px;")
+            placeholder.setStyleSheet("color: #F5F7FA; font-size: 42px;")
             self.content_layout.addWidget(placeholder)
             self.content_layout.addStretch()
             return
@@ -60,8 +60,8 @@ class ElementDetailPage(QtWidgets.QWidget):
         for allotrope in allotropes:
             group = QtWidgets.QGroupBox(allotrope.name)
             group.setStyleSheet(
-                "QGroupBox { color: #F5F7FA; font-size: 14px; font-weight: bold; border: 1px solid #2A3948;"
-                " border-radius: 6px; margin-top: 6px; background-color: #141D26; }"
+                "QGroupBox { color: #F5F7FA; font-size: 42px; font-weight: bold; border: 1px solid #2A3948;"
+                " border-radius: 6px; margin-top: 10px; background-color: #141D26; }"
                 "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }"
             )
             box_layout = QtWidgets.QVBoxLayout(group)
@@ -75,14 +75,14 @@ class ElementDetailPage(QtWidgets.QWidget):
                     continue
                 value = allotrope.properties[key]
                 label = QtWidgets.QLabel(PROPERTY_LABELS.get(key, key))
-                label.setStyleSheet("color: #F5F7FA; font-size: 12px;")
+                label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
                 value_label = QtWidgets.QLabel(value)
-                value_label.setStyleSheet("color: #F5F7FA; font-size: 12px;")
+                value_label.setStyleSheet("color: #F5F7FA; font-size: 36px;")
                 value_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
                 form.addRow(label, value_label)
             if form.rowCount() == 0:
                 empty = QtWidgets.QLabel("暂无可展示的属性数据。")
-                empty.setStyleSheet("color: #CFD6DE; font-size: 12px;")
+                empty.setStyleSheet("color: #CFD6DE; font-size: 36px;")
                 box_layout.addWidget(empty)
             else:
                 box_layout.addLayout(form)
