@@ -12,6 +12,7 @@ class ElementDetailPage(QtWidgets.QWidget):
 
     def __init__(self, parent: Optional[QtWidgets.QWidget] = None) -> None:
         super().__init__(parent)
+        self.setStyleSheet("background-color: #0C1218;")
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(8)
@@ -20,11 +21,12 @@ class ElementDetailPage(QtWidgets.QWidget):
         self.back_button = QtWidgets.QToolButton()
         self.back_button.setText("返回")
         self.back_button.setStyleSheet(
-            "QToolButton { color: #EDEDED; background-color: #1C2731; padding: 6px 12px; border-radius: 6px; }"
+            "QToolButton { color: #F5F7FA; background-color: #1C2731; padding: 8px 14px; border-radius: 6px;"
+            " font-size: 12px; }"
             "QToolButton:hover { background-color: #2A3948; }"
         )
         self.title_label = QtWidgets.QLabel("元素详情")
-        self.title_label.setStyleSheet("color: #EDEDED; font-size: 18px; font-weight: bold;")
+        self.title_label.setStyleSheet("color: #F5F7FA; font-size: 18px; font-weight: bold;")
         header.addWidget(self.back_button, alignment=QtCore.Qt.AlignLeft)
         header.addSpacing(8)
         header.addWidget(self.title_label)
@@ -33,8 +35,9 @@ class ElementDetailPage(QtWidgets.QWidget):
 
         self.scroll = QtWidgets.QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setStyleSheet("QScrollArea { border: none; }")
+        self.scroll.setStyleSheet("QScrollArea { border: none; background-color: #0C1218; }")
         self.content = QtWidgets.QWidget()
+        self.content.setStyleSheet("background-color: #0C1218;")
         self.content_layout = QtWidgets.QVBoxLayout(self.content)
         self.content_layout.setSpacing(12)
         self.content_layout.addStretch()
@@ -49,7 +52,7 @@ class ElementDetailPage(QtWidgets.QWidget):
         allotropes = get_allotropes(element.symbol)
         if not allotropes:
             placeholder = QtWidgets.QLabel("暂无可用的维基百科数据。")
-            placeholder.setStyleSheet("color: #EDEDED; font-size: 14px;")
+            placeholder.setStyleSheet("color: #F5F7FA; font-size: 14px;")
             self.content_layout.addWidget(placeholder)
             self.content_layout.addStretch()
             return
@@ -57,15 +60,11 @@ class ElementDetailPage(QtWidgets.QWidget):
         for allotrope in allotropes:
             group = QtWidgets.QGroupBox(allotrope.name)
             group.setStyleSheet(
-                "QGroupBox { color: #EDEDED; font-size: 14px; font-weight: bold; border: 1px solid #2A3948;"
-                " border-radius: 6px; margin-top: 6px; }"
+                "QGroupBox { color: #F5F7FA; font-size: 14px; font-weight: bold; border: 1px solid #2A3948;"
+                " border-radius: 6px; margin-top: 6px; background-color: #141D26; }"
                 "QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; }"
             )
             box_layout = QtWidgets.QVBoxLayout(group)
-            source = QtWidgets.QLabel(f'数据来源: <a href="{allotrope.source}">维基百科</a>')
-            source.setOpenExternalLinks(True)
-            source.setStyleSheet("color: #BFC9D4; font-size: 12px;")
-            box_layout.addWidget(source)
 
             form = QtWidgets.QFormLayout()
             form.setLabelAlignment(QtCore.Qt.AlignLeft)
@@ -76,14 +75,14 @@ class ElementDetailPage(QtWidgets.QWidget):
                     continue
                 value = allotrope.properties[key]
                 label = QtWidgets.QLabel(PROPERTY_LABELS.get(key, key))
-                label.setStyleSheet("color: #EDEDED; font-size: 12px;")
+                label.setStyleSheet("color: #F5F7FA; font-size: 12px;")
                 value_label = QtWidgets.QLabel(value)
-                value_label.setStyleSheet("color: #EDEDED; font-size: 12px;")
+                value_label.setStyleSheet("color: #F5F7FA; font-size: 12px;")
                 value_label.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
                 form.addRow(label, value_label)
             if form.rowCount() == 0:
                 empty = QtWidgets.QLabel("暂无可展示的属性数据。")
-                empty.setStyleSheet("color: #BFC9D4; font-size: 12px;")
+                empty.setStyleSheet("color: #CFD6DE; font-size: 12px;")
                 box_layout.addWidget(empty)
             else:
                 box_layout.addLayout(form)
@@ -191,6 +190,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
             detail_page.set_element(element)
             center_layout.setCurrentWidget(detail_page)
+            right_panel.setVisible(False)
+            right_panel.setFixedWidth(0)
+            right_toggle.setVisible(False)
+            right_toggle.setFixedWidth(0)
+
+        def show_table() -> None:
+            center_layout.setCurrentWidget(table_page)
+            right_panel.setVisible(True)
+            right_panel.setFixedWidth(right_panel_width)
+            right_toggle.setVisible(True)
+            right_toggle.setFixedWidth(12)
 
         def toggle_left_panel(checked: bool) -> None:
             left_panel.setVisible(checked)
@@ -203,7 +213,7 @@ class MainWindow(QtWidgets.QMainWindow):
         left_toggle.toggled.connect(toggle_left_panel)
         right_toggle.toggled.connect(toggle_right_panel)
         gl_widget.elementClicked.connect(show_element_detail)
-        detail_page.backRequested.connect(lambda: center_layout.setCurrentWidget(table_page))
+        detail_page.backRequested.connect(show_table)
 
         layout.addWidget(left_panel)
         layout.addWidget(left_toggle)
